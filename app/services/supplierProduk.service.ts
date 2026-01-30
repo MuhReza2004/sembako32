@@ -71,3 +71,18 @@ export const updateSupplierProduk = async (
 export const deleteSupplierProduk = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, "supplier_produk", id));
 };
+
+/* ======================
+   VALIDATION
+====================== */
+export const checkSupplierProdukExists = async (
+  supplierId: string,
+  produkId: string,
+): Promise<boolean> => {
+  const snap = await getDocs(collection(db, "supplier_produk"));
+  const existing = snap.docs.find(
+    (doc) =>
+      doc.data().supplierId === supplierId && doc.data().produkId === produkId,
+  );
+  return !!existing;
+};

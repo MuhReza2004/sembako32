@@ -28,7 +28,7 @@ export interface Penjualan {
   noSuratJalan: string;
   total: number;
   totalDibayar?: number; // Total amount paid
-  status: "Lunas" | "Belum Lunas";
+  status: "Lunas" | "Belum Lunas" | "Batal";
   riwayatPembayaran?: RiwayatPembayaran[]; // Payment history
   createdAt?: Date | any;
   updatedAt?: Date | any;

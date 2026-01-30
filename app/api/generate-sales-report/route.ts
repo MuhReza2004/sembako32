@@ -125,10 +125,9 @@ export async function POST(request: NextRequest) {
 
     // Calculate summary
     const totalSales = filteredSales.length;
-    const totalRevenue = filteredSales.reduce(
-      (sum, sale) => sum + sale.total,
-      0,
-    );
+    const totalRevenue = filteredSales
+      .filter((sale) => sale.status !== "Batal")
+      .reduce((sum, sale) => sum + sale.total, 0);
     const totalPajak = filteredSales.reduce(
       (sum, sale) => sum + (sale.pajak || 0),
       0,

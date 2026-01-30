@@ -344,7 +344,10 @@ export default function PenjualanForm({
                 </SelectTrigger>
                 <SelectContent>
                   {pelangganList
-                    .filter((p): p is Pelanggan & { id: string } => p.id !== undefined)
+                    .filter(
+                      (p): p is Pelanggan & { id: string } =>
+                        p.id !== undefined,
+                    )
                     .map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.namaPelanggan || ""} - {p.namaToko || ""}
@@ -667,13 +670,13 @@ export default function PenjualanForm({
         </div>
 
         <DialogFooter className="border-t pt-4">
-          {/* <Button
+          <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
             Batal
-          </Button> */}
+          </Button>
           <Button
             onClick={submit}
             disabled={isLoading || !pelangganId || items.length === 0}

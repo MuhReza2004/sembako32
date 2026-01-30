@@ -128,7 +128,10 @@ const getTotalRevenue = async (): Promise<number> => {
   let total = 0;
   snap.forEach((doc) => {
     const data = doc.data() as Penjualan;
-    total += data.total || 0;
+    // Exclude canceled sales from revenue calculation
+    if (data.status !== "Batal") {
+      total += data.total || 0;
+    }
   });
 
   return total;

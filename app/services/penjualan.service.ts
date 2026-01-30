@@ -412,6 +412,45 @@ export const deletePenjualan = async (id: string) => {
   });
 };
 
+// --- NEW cancelPenjualan function ---
+export const cancelPenjualan = async (id: string) => {
+  // Use a transaction to restore stock and update status to "Batal"
+  await runTransaction(db, async (transaction) => {
+    const penjualanRef = doc(db, "penjualan", id);
+    const penjualanDoc = await transaction.get(penjualanRef);
+
+    if (!penjualanDoc.exists()) {
+      throw new Error("Transaksi penjualan tidak ditemukan.");
+    }
+
+    // Fetch details from penjualan_detail collection
+    const detailQuery = query(
+      collection(db, "penjualan_detail"),
+      where("penjualanId", "==", id),
+    );
+    const detailSnap = await getDocs(detailQuery);
+
+    // Restore stock for all items
+    for (const detailDoc of detailSnap.docs) {
+      const detailData = detailDoc.data();
+      const supplierProdukRef = doc(
+        db,
+        "supplier_produk",
+        detailData.supplierProdukId,
+      );
+      transaction.update(supplierProdukRef, {
+        stok: increment(detailData.qty),
+      });
+    }
+
+    // Update the penjualan document status to "Batal"
+    transaction.update(penjualanRef, {
+      status: "Batal",
+      updatedAt: new Date(),
+    });
+  });
+};
+
 // --- existing generateInvoiceNumber function ---
 export const generateInvoiceNumber = async (): Promise<string> => {
   const counterRef = doc(db, "counters", "penjualan");

@@ -101,7 +101,7 @@ export default function PenjualanReportPage() {
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      
+
       // Load the PDF into the already-opened tab.
       newTab.location.href = url;
     } catch (error) {
@@ -351,6 +351,8 @@ export default function PenjualanReportPage() {
               cell.font = { ...cell.font, color: { argb: "FF16A34A" } };
             } else if (cell.value === "Belum Lunas") {
               cell.font = { ...cell.font, color: { argb: "FFDC2626" } };
+            } else if (cell.value === "Batal") {
+              cell.font = { ...cell.font, color: { argb: "FF6B7280" } };
             }
           }
         });
@@ -401,8 +403,9 @@ export default function PenjualanReportPage() {
   };
 
   const totalSales = filteredData.length;
-  const totalRevenue = filteredData.reduce((sum, sale) => sum + sale.total, 0);
-  const totalPajak = filteredData.reduce(
+  const activeSales = filteredData.filter((sale) => sale.status !== "Batal");
+  const totalRevenue = activeSales.reduce((sum, sale) => sum + sale.total, 0);
+  const totalPajak = activeSales.reduce(
     (sum, sale) => sum + (sale.pajak || 0),
     0,
   );
@@ -412,6 +415,9 @@ export default function PenjualanReportPage() {
   ).length;
   const unpaidSales = filteredData.filter(
     (sale) => sale.status === "Belum Lunas",
+  ).length;
+  const canceledSales = filteredData.filter(
+    (sale) => sale.status === "Batal",
   ).length;
 
   if (isLoading) {
@@ -508,6 +514,18 @@ export default function PenjualanReportPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{unpaidSales}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Penjualan Batal
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-gray-600">
+              {canceledSales}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -622,7 +640,9 @@ export default function PenjualanReportPage() {
                           className={
                             penjualan.status === "Lunas"
                               ? "bg-green-600 text-white hover:bg-green-700"
-                              : "bg-red-600 text-white hover:bg-red-700"
+                              : penjualan.status === "Batal"
+                                ? "bg-gray-600 text-white hover:bg-gray-700"
+                                : "bg-red-600 text-white hover:bg-red-700"
                           }
                         >
                           {penjualan.status}

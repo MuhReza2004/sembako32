@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatRupiah, formatTanggal } from "@/helper/format";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,8 @@ interface PenjualanTabelProps {
   onUpdateStatus: (id: string, status: "Lunas" | "Belum Lunas") => void;
   onEdit: (penjualan: Penjualan) => void;
   onCancel: (id: string) => void;
+  updatingStatus?: string | null;
+  cancelingTransaction?: string | null;
 }
 
 export default function PenjualanTabel({
@@ -39,6 +41,8 @@ export default function PenjualanTabel({
   onUpdateStatus,
   onEdit,
   onCancel,
+  updatingStatus,
+  cancelingTransaction,
 }: PenjualanTabelProps) {
   if (isLoading) {
     return <p>Loading...</p>;
@@ -69,52 +73,66 @@ export default function PenjualanTabel({
           {data
             .filter((p): p is Penjualan & { id: string } => !!p.id)
             .map((penjualan) => (
-            <TableRow key={penjualan.id}>
-              <TableCell className="font-medium">
-                {penjualan.noInvoice}
-              </TableCell>
-              <TableCell>{formatTanggal(penjualan.tanggal)}</TableCell>
-              <TableCell>{penjualan.namaPelanggan}</TableCell>
-              <TableCell className="text-center">
-                {formatRupiah(penjualan.total)}
-              </TableCell>
-              <TableCell className="text-center">
-                <Badge
-                  variant={
-                    penjualan.status === "Lunas" ? "default" : "destructive"
-                  }
-                >
-                  {penjualan.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Toggle menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => onViewDetails(penjualan)}>
-                      Lihat Detail
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(penjualan)}>
-                      Edit
-                    </DropdownMenuItem>
+              <TableRow key={penjualan.id}>
+                <TableCell className="font-medium">
+                  {penjualan.noInvoice}
+                </TableCell>
+                <TableCell>{formatTanggal(penjualan.tanggal)}</TableCell>
+                <TableCell>{penjualan.namaPelanggan}</TableCell>
+                <TableCell className="text-center">
+                  {formatRupiah(penjualan.total)}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge
+                    variant={
+                      penjualan.status === "Lunas"
+                        ? "default"
+                        : penjualan.status === "Batal"
+                          ? "secondary"
+                          : "destructive"
+                    }
+                  >
+                    {penjualan.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Toggle menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => onViewDetails(penjualan)}
+                      >
+                        Lihat Detail
+                      </DropdownMenuItem>
+                      {/* <DropdownMenuItem onClick={() => onEdit(penjualan)}>
+                        Edit
+                      </DropdownMenuItem> */}
 
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onClick={() => onCancel(penjualan.id)}
-                    >
-                      Batal
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => onCancel(penjualan.id)}
+                        disabled={cancelingTransaction === penjualan.id}
+                      >
+                        {cancelingTransaction === penjualan.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Membatalkan...
+                          </>
+                        ) : (
+                          "Batal"
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </div>

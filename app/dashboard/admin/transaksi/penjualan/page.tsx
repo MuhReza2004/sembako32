@@ -10,6 +10,7 @@ import {
   getAllPenjualan,
   updatePenjualanStatus,
   deletePenjualan,
+  cancelPenjualan,
 } from "@/app/services/penjualan.service";
 import { getPelangganById } from "@/app/services/pelanggan.service";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,10 @@ export default function PenjualanPage() {
   const [selectedPenjualan, setSelectedPenjualan] = useState<Penjualan | null>(
     null,
   );
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [cancelingTransaction, setCancelingTransaction] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +56,7 @@ export default function PenjualanPage() {
     id: string,
     status: "Lunas" | "Belum Lunas",
   ) => {
+    setUpdatingStatus(id);
     try {
       await updatePenjualanStatus(id, status);
       // Refresh data to reflect the updated status
@@ -60,6 +66,8 @@ export default function PenjualanPage() {
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Gagal mengubah status penjualan.");
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -72,15 +80,23 @@ export default function PenjualanPage() {
   const handleCancel = async (id: string) => {
     if (
       confirm(
-        "Apakah Anda yakin ingin membatalkan transaksi ini? Stok produk akan dikembalikan.",
+        "Apakah Anda yakin ingin membatalkan transaksi ini? Status akan diubah menjadi 'Batal' dan stok produk akan dikembalikan.",
       )
     ) {
+      setCancelingTransaction(id);
       try {
-        await deletePenjualan(id);
-        alert("Transaksi berhasil dibatalkan dan stok telah dikembalikan.");
+        await cancelPenjualan(id);
+        // Refresh data to reflect the updated status
+        const updatedSales = await getAllPenjualan();
+        setData(updatedSales);
+        alert(
+          "Transaksi berhasil dibatalkan. Status diubah menjadi 'Batal' dan stok telah dikembalikan.",
+        );
       } catch (error) {
         console.error("Error canceling transaction:", error);
         alert("Gagal membatalkan transaksi.");
+      } finally {
+        setCancelingTransaction(null);
       }
     }
   };
@@ -109,6 +125,8 @@ export default function PenjualanPage() {
         onUpdateStatus={handleUpdateStatus}
         onEdit={handleEdit}
         onCancel={handleCancel}
+        updatingStatus={updatingStatus}
+        cancelingTransaction={cancelingTransaction}
       />
       <DialogDetailPenjualan
         open={dialogDetailOpen}

@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/select";
 
 import { SupplierProdukFormData } from "@/app/types/suplyer";
-import { addSupplierProduk } from "@/app/services/supplierProduk.service";
+import {
+  addSupplierProduk,
+  checkSupplierProdukExists,
+} from "@/app/services/supplierProduk.service";
 import { getAllSuppliers } from "@/app/services/supplyer.service";
 import { getAllProduk } from "@/app/services/produk.service";
 import { Supplier } from "@/app/types/suplyer";
@@ -142,11 +145,31 @@ export default function DialogTambahHargaProduk({
     e.preventDefault();
     setLoading(true);
 
-    await addSupplierProduk(formData);
+    try {
+      // Check if supplier-product combination already exists
+      const exists = await checkSupplierProdukExists(
+        formData.supplierId,
+        formData.produkId,
+      );
 
-    setLoading(false);
-    onSuccess?.();
-    onOpenChange(false);
+      if (exists) {
+        alert(
+          "Produk dengan supplier yang sama sudah ada. Tidak dapat menambahkan harga produk yang sama.",
+        );
+        setLoading(false);
+        return;
+      }
+
+      await addSupplierProduk(formData);
+
+      onSuccess?.();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error adding supplier product:", error);
+      alert("Gagal menambahkan harga produk. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
