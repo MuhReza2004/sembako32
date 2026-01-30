@@ -45,6 +45,8 @@ export default function DialogEditHargaProduk({
   const [products, setProducts] = useState<Produk[]>([]);
   const [displayPrice, setDisplayPrice] = useState("");
   const [displaySellPrice, setDisplaySellPrice] = useState("");
+  const [margin, setMargin] = useState(0);
+  const [marginPercentage, setMarginPercentage] = useState(0);
 
   const [formData, setFormData] = useState<SupplierProdukFormData>({
     supplierId: "",
@@ -77,6 +79,11 @@ export default function DialogEditHargaProduk({
       });
       setDisplayPrice(formatRupiah(item.hargaBeli));
       setDisplaySellPrice(formatRupiah(item.hargaJual));
+      const newMargin = item.hargaJual - item.hargaBeli;
+      setMargin(newMargin);
+      setMarginPercentage(
+        item.hargaBeli > 0 ? (newMargin / item.hargaBeli) * 100 : 0,
+      );
     }
   }, [item]);
 
@@ -85,7 +92,17 @@ export default function DialogEditHargaProduk({
     const numericValue = value.replace(/[^\d]/g, "");
     const numberValue = parseInt(numericValue) || 0;
 
-    setFormData((p) => ({ ...p, hargaBeli: numberValue }));
+    setFormData((p) => {
+      const newFormData = { ...p, hargaBeli: numberValue };
+      const newMargin = newFormData.hargaJual - newFormData.hargaBeli;
+      setMargin(newMargin);
+      setMarginPercentage(
+        newFormData.hargaBeli > 0
+          ? (newMargin / newFormData.hargaBeli) * 100
+          : 0,
+      );
+      return newFormData;
+    });
     setDisplayPrice(formatRupiah(numberValue));
   };
 
@@ -94,7 +111,17 @@ export default function DialogEditHargaProduk({
     const numericValue = value.replace(/[^\d]/g, "");
     const numberValue = parseInt(numericValue) || 0;
 
-    setFormData((p) => ({ ...p, hargaJual: numberValue }));
+    setFormData((p) => {
+      const newFormData = { ...p, hargaJual: numberValue };
+      const newMargin = newFormData.hargaJual - newFormData.hargaBeli;
+      setMargin(newMargin);
+      setMarginPercentage(
+        newFormData.hargaBeli > 0
+          ? (newMargin / newFormData.hargaBeli) * 100
+          : 0,
+      );
+      return newFormData;
+    });
     setDisplaySellPrice(formatRupiah(numberValue));
   };
 
@@ -178,6 +205,20 @@ export default function DialogEditHargaProduk({
               onChange={(e) => handleSellPriceChange(e.target.value)}
               placeholder="Rp 0"
               required
+            />
+          </div>
+
+          <div>
+            <Label>Margin</Label>
+            <Input value={formatRupiah(margin)} readOnly placeholder="Rp 0" />
+          </div>
+
+          <div>
+            <Label>Margin (%)</Label>
+            <Input
+              value={`${marginPercentage.toFixed(2)}%`}
+              readOnly
+              placeholder="0.00%"
             />
           </div>
 
