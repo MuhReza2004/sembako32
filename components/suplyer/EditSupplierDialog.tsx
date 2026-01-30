@@ -1,5 +1,6 @@
 "use client";
 
+import { getAllSuppliers } from "@/app/services/supplyer.service";
 import { useEffect, useState } from "react";
 import { Supplier } from "@/app/types/suplyer";
 import {

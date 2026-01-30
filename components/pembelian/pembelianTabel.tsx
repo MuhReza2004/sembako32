@@ -305,7 +305,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
                       </div>
                     ) : (
                       <span className="text-gray-600 font-mono">
-                        {formatRupiah(p.items?.[0]?.harga)}
+                        {formatRupiah(p.items?.[0]?.harga ?? 0)}
                       </span>
                     )}
                   </TableCell>
@@ -344,7 +344,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
                         defaultValue={p.status}
                         value={p.status}
                         onValueChange={(newStatus) =>
-                          handleStatusChange(p.id, newStatus)
+                          handleStatusChange(p.id!, newStatus)
                         }
                       >
                         <SelectTrigger className="w-[120px] h-9">

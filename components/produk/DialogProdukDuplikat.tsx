@@ -68,7 +68,7 @@ export const DialogProdukDuplikat: React.FC<DialogProdukDuplikatProps> = ({
             <div className="space-y-1 text-sm text-gray-600">
               <p>
                 <span className="font-medium">Nama:</span>{" "}
-                {existingProduct.nameProduk}
+                {existingProduct.nama}
               </p>
               <p>
                 <span className="font-medium">Stok saat ini:</span>{" "}
@@ -76,10 +76,6 @@ export const DialogProdukDuplikat: React.FC<DialogProdukDuplikatProps> = ({
                   {existingProduct.stok}
                 </span>{" "}
                 {existingProduct.satuan}
-              </p>
-              <p>
-                <span className="font-medium">Harga Beli:</span> Rp{" "}
-                {existingProduct.hargaBeli.toLocaleString("id-ID")}
               </p>
             </div>
           </div>

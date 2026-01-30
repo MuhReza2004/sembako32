@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   createPenjualan,
@@ -52,7 +52,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 
-export default function TambahPenjualanPage() {
+function TambahPenjualanForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("id");
@@ -200,7 +200,9 @@ export default function TambahPenjualanPage() {
     if (currentItem.qty > supplierProduk.stok) {
       const produk = produkList.find((p) => p.id === supplierProduk.produkId);
       setError(
-        `Stok ${produk?.nama || "Produk"} tidak mencukupi (sisa: ${supplierProduk.stok})`,
+        `Stok ${produk?.nama || "Produk"} tidak mencukupi (sisa: ${
+          supplierProduk.stok
+        })`,
       );
       return;
     }
@@ -254,7 +256,9 @@ export default function TambahPenjualanPage() {
     if (supplierProduk && item.qty > supplierProduk.stok) {
       const produk = produkList.find((p) => p.id === supplierProduk.produkId);
       setError(
-        `Stok ${produk?.nama || "Produk"} tidak mencukupi (sisa: ${supplierProduk.stok})`,
+        `Stok ${produk?.nama || "Produk"} tidak mencukupi (sisa: ${
+          supplierProduk.stok
+        })`,
       );
       item.qty = supplierProduk.stok;
     } else {
@@ -483,7 +487,10 @@ export default function TambahPenjualanPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {pelangganList.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
+                          <SelectItem
+                            key={p.id || p.namaPelanggan}
+                            value={p.id || ""}
+                          >
                             <div className="flex items-center gap-2">
                               <UserCircle className="h-4 w-4 text-blue-500" />
                               <div>
@@ -1075,5 +1082,13 @@ export default function TambahPenjualanPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TambahPenjualanPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TambahPenjualanForm />
+    </Suspense>
   );
 }

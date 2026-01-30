@@ -36,7 +36,7 @@ export default function DialogDetailPembelian({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (pembelian) {
+      if (pembelian && pembelian.id) {
         const det = await getPembelianDetails(pembelian.id);
         const sups = await getAllSuppliers();
         const prods = await getAllProduk();

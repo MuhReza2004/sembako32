@@ -34,7 +34,7 @@ export default function DialogDetailProduk({
             <label className="text-sm font-medium text-gray-700">
               Nama Produk
             </label>
-            <p className="text-lg font-semibold">{produk.nameProduk}</p>
+            <p className="text-lg font-semibold">{produk.nama}</p>
           </div>
 
           <div>

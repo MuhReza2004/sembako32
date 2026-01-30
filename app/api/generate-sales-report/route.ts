@@ -555,7 +555,7 @@ export async function POST(request: NextRequest) {
     // Launch Puppeteer and generate PDF
     console.log("Launching Puppeteer...");
     const browser = await puppeteer.launch({
-      headless: "new",
+      headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
@@ -595,10 +595,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating PDF:", error);
-    console.error("Error details:", error.message);
-    console.error("Error stack:", error.stack);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error("Error details:", errorMessage);
+    console.error("Error stack:", errorStack);
     return NextResponse.json(
-      { error: "Gagal membuat laporan PDF", details: error.message },
+      { error: "Gagal membuat laporan PDF", details: errorMessage },
       { status: 500 },
     );
   }

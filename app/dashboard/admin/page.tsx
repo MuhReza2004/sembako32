@@ -34,6 +34,22 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const updateDashboardData = async () => {
+    try {
+      console.log("Updating dashboard data...");
+      const dashboardData = await getDashboardData();
+      console.log("Dashboard data received:", dashboardData);
+      console.log("Low stock items:", dashboardData.lowStockItems);
+      setData(dashboardData);
+      setIsLoading(false);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error updating dashboard data:", err);
+      setError("Gagal memperbarui data dashboard");
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Set up real-time listeners for dashboard data
     const setupRealtimeListeners = async () => {
@@ -112,22 +128,6 @@ export default function AdminDashboardPage() {
       } catch (err: any) {
         console.error("Error setting up dashboard listeners:", err);
         setError("Gagal memuat data dashboard");
-        setIsLoading(false);
-      }
-    };
-
-    const updateDashboardData = async () => {
-      try {
-        console.log("Updating dashboard data...");
-        const dashboardData = await getDashboardData();
-        console.log("Dashboard data received:", dashboardData);
-        console.log("Low stock items:", dashboardData.lowStockItems);
-        setData(dashboardData);
-        setIsLoading(false);
-        setError(null);
-      } catch (err: any) {
-        console.error("Error updating dashboard data:", err);
-        setError("Gagal memperbarui data dashboard");
         setIsLoading(false);
       }
     };

@@ -88,7 +88,7 @@ export default function PelangganAdminPage() {
   };
 
   const handleEditSubmit = async (data: PelangganFormData) => {
-    if (!selectedCustomer) return;
+    if (!selectedCustomer || !selectedCustomer.id) return;
 
     // A new object is created with only the properties of `PelangganFormData`
     const cleanData: Partial<PelangganFormData> = {
@@ -127,7 +127,7 @@ export default function PelangganAdminPage() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!selectedCustomer) return;
+    if (!selectedCustomer || !selectedCustomer.id) return;
 
     try {
       setIsSubmitting(true);

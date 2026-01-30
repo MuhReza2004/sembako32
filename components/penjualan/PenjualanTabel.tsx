@@ -66,7 +66,9 @@ export default function PenjualanTabel({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((penjualan) => (
+          {data
+            .filter((p): p is Penjualan & { id: string } => !!p.id)
+            .map((penjualan) => (
             <TableRow key={penjualan.id}>
               <TableCell className="font-medium">
                 {penjualan.noInvoice}

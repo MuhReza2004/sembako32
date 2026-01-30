@@ -103,30 +103,29 @@ export default function PenjualanForm({
     if (open) {
       if (editingPenjualan) {
         // Populate form with existing data for editing
-        setPelangganId(editingPenjualan.pelangganId);
-        setNamaPelanggan(editingPenjualan.namaPelanggan);
-        setNamaToko(editingPenjualan.namaToko);
-        setAlamatPelanggan(editingPenjualan.alamatPelanggan);
-        setInvoiceNumber(editingPenjualan.nomorInvoice);
-        setItems(editingPenjualan.items);
-        setStatus(editingPenjualan.status);
-        setMetodePembayaran(editingPenjualan.metodePembayaran);
-        setNomorRekening(editingPenjualan.nomorRekening || "");
-        setNamaBank(editingPenjualan.namaBank || "");
-        setNamaPemilikRekening(editingPenjualan.namaPemilikRekening || "");
-        setDiskon(editingPenjualan.diskon);
-        setPajakEnabled(editingPenjualan.pajakEnabled);
-        setTanggalJatuhTempo(editingPenjualan.tanggalJatuhTempo || "");
+        const penj = editingPenjualan as Penjualan;
+        setPelangganId(penj.pelangganId);
+        setNamaPelanggan(penj.namaPelanggan || "");
+        setAlamatPelanggan(penj.alamatPelanggan || "");
+        setInvoiceNumber(penj.noInvoice || "");
+        setItems(penj.items || []);
+        setStatus((penj.status as "Lunas" | "Belum Lunas") || "Lunas");
+        setMetodePembayaran(
+          (penj.metodePembayaran as "Tunai" | "Transfer") || "Tunai",
+        );
+        setNomorRekening(penj.nomorRekening || "");
+        setNamaBank(penj.namaBank || "");
+        setNamaPemilikRekening(penj.namaPemilikRekening || "");
+        setDiskon(penj.diskon || 0);
+        setPajakEnabled(penj.pajakEnabled ?? true);
+        setTanggalJatuhTempo(penj.tanggalJatuhTempo || "");
         setError(null);
       } else {
         resetForm();
       }
     }
 
-    const qProduk = query(
-      collection(db, "produk"),
-      orderBy("nameProduk", "asc"),
-    );
+    const qProduk = query(collection(db, "produk"), orderBy("nama", "asc"));
     const unsubscribeProduk = onSnapshot(qProduk, (snapshot) => {
       const prods = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }) as Produk)
@@ -136,7 +135,7 @@ export default function PenjualanForm({
 
     const qPelanggan = query(
       collection(db, "pelanggan"),
-      orderBy("namePelanggan", "asc"),
+      orderBy("namaPelanggan", "asc"),
     );
     const unsubscribePelanggan = onSnapshot(qPelanggan, (snapshot) => {
       const allPelanggan = snapshot.docs.map((doc) => ({
@@ -156,10 +155,10 @@ export default function PenjualanForm({
     setItems([
       ...items,
       {
-        produkId: "",
+        supplierProdukId: "",
         namaProduk: "",
         satuan: "",
-        hargaJual: 0,
+        harga: 0,
         qty: 1,
         subtotal: 0,
       },
@@ -171,24 +170,22 @@ export default function PenjualanForm({
     const item = newItems[i];
     (item as any)[field] = value;
 
-    const produk = produkList.find((p) => p.id === item.produkId);
+    const produk = produkList.find((p) => p.id === item.supplierProdukId);
 
-    if (field === "produkId" && produk) {
-      item.namaProduk = produk.nameProduk;
-      item.hargaJual = produk.hargaJual;
+    if (field === "supplierProdukId" && produk) {
+      item.namaProduk = produk.nama;
+      item.harga = (produk as any).hargaJual || 0;
       item.satuan = produk.satuan;
     }
 
     if (produk && item.qty > produk.stok) {
-      setError(
-        `Stok ${produk.nameProduk} tidak mencukupi (sisa: ${produk.stok})`,
-      );
+      setError(`Stok ${produk.nama} tidak mencukupi (sisa: ${produk.stok})`);
       item.qty = produk.stok;
     } else {
       setError(null);
     }
 
-    item.subtotal = item.hargaJual * item.qty;
+    item.subtotal = item.harga * item.qty;
     setItems(newItems);
   };
 
@@ -219,7 +216,7 @@ export default function PenjualanForm({
     }
     if (
       items.length === 0 ||
-      items.some((item) => !item.produkId || !item.qty)
+      items.some((item) => !item.supplierProdukId || !item.qty)
     ) {
       setError("Pastikan ada produk yang dipilih dan kuantitas terisi");
       return;
@@ -333,11 +330,11 @@ export default function PenjualanForm({
               <Select
                 onValueChange={(val) => {
                   const p = pelangganList.find((x) => x.id === val);
-                  if (p) {
-                    setPelangganId(p.id);
-                    setNamaPelanggan(p.namePelanggan);
-                    setNamaToko(p.namaToko);
-                    setAlamatPelanggan(p.alamat || "");
+                  if (p && p.id) {
+                    setPelangganId(p.id as string);
+                    setNamaPelanggan(p.namaPelanggan as string);
+                    setNamaToko(p.namaToko as string);
+                    setAlamatPelanggan(p.alamat as string);
                   }
                 }}
                 value={pelangganId}
@@ -346,11 +343,13 @@ export default function PenjualanForm({
                   <SelectValue placeholder="Pilih Pelanggan" />
                 </SelectTrigger>
                 <SelectContent>
-                  {pelangganList.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.namePelanggan} - {p.namaToko}
-                    </SelectItem>
-                  ))}
+                  {pelangganList
+                    .filter((p): p is Pelanggan & { id: string } => p.id !== undefined)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.namaPelanggan || ""} - {p.namaToko || ""}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -514,7 +513,7 @@ export default function PenjualanForm({
                 {/* Table Body */}
                 {items.map((item, i) => {
                   const selectedProduk = produkList.find(
-                    (p) => p.id === item.produkId,
+                    (p) => p.id === item.supplierProdukId,
                   );
                   return (
                     <Card
@@ -529,9 +528,9 @@ export default function PenjualanForm({
                           </Label>
                           <Select
                             onValueChange={(val) =>
-                              updateItem(i, "produkId", val)
+                              updateItem(i, "supplierProdukId", val)
                             }
-                            value={item.produkId}
+                            value={item.supplierProdukId}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Pilih Produk" />
@@ -544,7 +543,7 @@ export default function PenjualanForm({
                                   disabled={p.stok === 0}
                                 >
                                   <div className="flex justify-between items-center w-full">
-                                    <span>{p.nameProduk}</span>
+                                    <span>{p.nama}</span>
                                     <Badge
                                       variant={
                                         p.stok > 0 ? "outline" : "destructive"
@@ -573,7 +572,7 @@ export default function PenjualanForm({
                             onChange={(e) =>
                               updateItem(i, "qty", Number(e.target.value))
                             }
-                            disabled={!item.produkId}
+                            disabled={!item.supplierProdukId}
                             className="w-full"
                           />
                         </div>
@@ -594,7 +593,7 @@ export default function PenjualanForm({
                             Harga Satuan
                           </Label>
                           <div className="font-medium text-foreground px-3 py-2 bg-gray-50 rounded-md">
-                            {formatRupiah(item.hargaJual)}
+                            {formatRupiah(item.hargaJual || 0)}
                           </div>
                         </div>
 

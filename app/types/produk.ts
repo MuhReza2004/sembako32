@@ -5,6 +5,7 @@ export interface ProdukFormData {
   nama: string; // Nama produk
   satuan: string; // Satuan (pcs, sak, kg, liter)
   kategori: string; // Kategori produk
+  stok: number; // Jumlah stok awal
   status: ProdukStatus; // Status (aktif / nonaktif)
 }
 

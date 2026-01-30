@@ -51,13 +51,13 @@ export const DialogHapusProduk: React.FC<DialogHapusProdukProps> = ({
           <div className="bg-red-50 border border-red-200 rounded p-4">
             <p className="text-sm text-gray-600">
               <span className="font-semibold">ID Produk:</span>{" "}
-              {produk.idProduk}
+              {produk.id}
             </p>
             <p className="text-sm text-gray-600 mt-2">
-              <span className="font-semibold">Nama:</span> {produk.nameProduk}
+              <span className="font-semibold">Nama:</span> {produk.nama}
             </p>
             <p className="text-sm text-gray-600 mt-2">
-              <span className="font-semibold">Kode:</span> {produk.kodeProduk}
+              <span className="font-semibold">Kode:</span> {produk.kode}
             </p>
             <p className="text-sm text-red-600 mt-3 font-semibold">
               Apakah Anda yakin ingin menghapus produk ini?
