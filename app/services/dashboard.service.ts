@@ -46,31 +46,33 @@ export interface RecentTransaction {
   supplier?: string;
 }
 
-export const getDashboardData = async (): Promise<DashboardData> => {
+export const getDashboardData = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<DashboardData> => {
   try {
-    // Get total counts
-    const [products, customers, suppliers, sales, purchases] =
-      await Promise.all([
-        getTotalProducts(),
-        getTotalCustomers(),
-        getTotalSuppliers(),
-        getTotalSales(),
-        getTotalPurchases(),
-      ]);
-
-    // Get financial data
-    const [revenue, expenses] = await Promise.all([
-      getTotalRevenue(),
-      getTotalExpenses(),
-    ]);
-
-    // Get low stock items
-    const lowStockItems = await getLowStockItems();
-
-    // Get recent transactions
-    const [recentSales, recentPurchases] = await Promise.all([
-      getRecentSales(),
-      getRecentPurchases(),
+    const [
+      products,
+      customers,
+      suppliers,
+      sales,
+      purchases,
+      revenue,
+      expenses,
+      lowStockItems,
+      recentSales,
+      recentPurchases,
+    ] = await Promise.all([
+      getTotalProducts(),
+      getTotalCustomers(),
+      getTotalSuppliers(),
+      getTotalSales(dateRange),
+      getTotalPurchases(dateRange),
+      getTotalRevenue(dateRange),
+      getTotalExpenses(dateRange),
+      getLowStockItems(),
+      getRecentSales(dateRange),
+      getRecentPurchases(dateRange),
     ]);
 
     return {
@@ -109,26 +111,55 @@ const getTotalSuppliers = async (): Promise<number> => {
   return snap.size;
 };
 
-const getTotalSales = async (): Promise<number> => {
-  const q = query(collection(db, "penjualan"));
+const getTotalSales = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<number> => {
+  let q = query(collection(db, "penjualan"));
+  if (dateRange) {
+    q = query(
+      q,
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+    );
+  }
   const snap = await getDocs(q);
   return snap.size;
 };
 
-const getTotalPurchases = async (): Promise<number> => {
-  const q = query(collection(db, "pembelian"));
+const getTotalPurchases = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<number> => {
+  let q = query(collection(db, "pembelian"));
+  if (dateRange) {
+    q = query(
+      q,
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+    );
+  }
   const snap = await getDocs(q);
   return snap.size;
 };
 
-const getTotalRevenue = async (): Promise<number> => {
-  const q = query(collection(db, "penjualan"));
+const getTotalRevenue = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<number> => {
+  let q = query(collection(db, "penjualan"));
+  if (dateRange) {
+    q = query(
+      q,
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+    );
+  }
   const snap = await getDocs(q);
 
   let total = 0;
   snap.forEach((doc) => {
     const data = doc.data() as Penjualan;
-    // Exclude canceled sales from revenue calculation
     if (data.status !== "Batal") {
       total += data.total || 0;
     }
@@ -137,8 +168,18 @@ const getTotalRevenue = async (): Promise<number> => {
   return total;
 };
 
-const getTotalExpenses = async (): Promise<number> => {
-  const q = query(collection(db, "pembelian"));
+const getTotalExpenses = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<number> => {
+  let q = query(collection(db, "pembelian"));
+  if (dateRange) {
+    q = query(
+      q,
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+    );
+  }
   const snap = await getDocs(q);
 
   let total = 0;
@@ -151,11 +192,8 @@ const getTotalExpenses = async (): Promise<number> => {
 };
 
 const getLowStockItems = async (): Promise<LowStockItem[]> => {
-  // Get all products
   const produkQuery = query(collection(db, "produk"));
   const produkSnap = await getDocs(produkQuery);
-
-  // Get all supplier products to calculate current stock
   const supplierProdukQuery = query(collection(db, "supplier_produk"));
   const supplierProdukSnap = await getDocs(supplierProdukQuery);
 
@@ -172,15 +210,11 @@ const getLowStockItems = async (): Promise<LowStockItem[]> => {
   const lowStockItems: LowStockItem[] = [];
   produkSnap.forEach((doc) => {
     const data = doc.data() as Produk;
-
-    // Calculate current stock as sum of all supplier product stocks for this product
     const relatedSupplierProduk = supplierProdukMap.get(doc.id) || [];
     const currentStock = relatedSupplierProduk.reduce(
       (sum, sp) => sum + (sp.stok || 0),
       0,
     );
-
-    // Assume minimum stock is 10 (this could be configurable per product)
     const minStock = 10;
 
     if (currentStock < minStock) {
@@ -194,24 +228,35 @@ const getLowStockItems = async (): Promise<LowStockItem[]> => {
     }
   });
 
-  // Sort by current stock (lowest first) and return top 5
   return lowStockItems
     .sort((a, b) => a.currentStock - b.currentStock)
     .slice(0, 5);
 };
 
-const getRecentSales = async (): Promise<RecentTransaction[]> => {
-  const q = query(
-    collection(db, "penjualan"),
-    orderBy("createdAt", "desc"),
-    limit(3),
-  );
+const getRecentSales = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<RecentTransaction[]> => {
+  let q;
+  if (dateRange) {
+    q = query(
+      collection(db, "penjualan"),
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+      orderBy("createdAt", "desc"),
+    );
+  } else {
+    q = query(
+      collection(db, "penjualan"),
+      orderBy("createdAt", "desc"),
+      limit(3),
+    );
+  }
   const snap = await getDocs(q);
 
   const recentSales: RecentTransaction[] = [];
   for (const saleDoc of snap.docs) {
     const data = saleDoc.data() as Penjualan;
-    console.log("Sales data createdAt:", data.createdAt, typeof data.createdAt);
     let pelangganName = "Unknown";
 
     if (data.pelangganId) {
@@ -228,54 +273,42 @@ const getRecentSales = async (): Promise<RecentTransaction[]> => {
       }
     }
 
-    let parsedDate: Date;
-    try {
-      if (data.createdAt) {
-        if (typeof data.createdAt.toDate === "function") {
-          parsedDate = data.createdAt.toDate();
-        } else if (data.createdAt instanceof Date) {
-          parsedDate = data.createdAt;
-        } else {
-          parsedDate = new Date(data.createdAt);
-        }
-      } else {
-        parsedDate = new Date();
-      }
-      console.log("Parsed date:", parsedDate);
-    } catch (error) {
-      console.error("Date parsing error:", error);
-      parsedDate = new Date();
-    }
-
     recentSales.push({
       id: saleDoc.id,
       kode: data.noInvoice || `SL-${saleDoc.id.slice(-6)}`,
-      tanggal: parsedDate,
+      tanggal: data.createdAt.toDate(),
       total: data.total || 0,
       status: data.status || "Belum Lunas",
       pelanggan: pelangganName,
     });
   }
-
   return recentSales;
 };
 
-const getRecentPurchases = async (): Promise<RecentTransaction[]> => {
-  const q = query(
-    collection(db, "pembelian"),
-    orderBy("createdAt", "desc"),
-    limit(3),
-  );
+const getRecentPurchases = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<RecentTransaction[]> => {
+  let q;
+  if (dateRange) {
+    q = query(
+      collection(db, "pembelian"),
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+      orderBy("createdAt", "desc"),
+    );
+  } else {
+    q = query(
+      collection(db, "pembelian"),
+      orderBy("createdAt", "desc"),
+      limit(3),
+    );
+  }
   const snap = await getDocs(q);
 
   const recentPurchases: RecentTransaction[] = [];
   for (const purchaseDoc of snap.docs) {
     const data = purchaseDoc.data() as Pembelian;
-    console.log(
-      "Purchase data createdAt:",
-      data.createdAt,
-      typeof data.createdAt,
-    );
     let supplierName = "Unknown";
 
     if (data.supplierId) {
@@ -290,53 +323,14 @@ const getRecentPurchases = async (): Promise<RecentTransaction[]> => {
       }
     }
 
-    let parsedDate: Date;
-    try {
-      if (
-        data.createdAt &&
-        typeof data.createdAt === "object" &&
-        !Array.isArray(data.createdAt) &&
-        Object.keys(data.createdAt).length === 0
-      ) {
-        // Handle empty object case
-        console.warn(
-          "Empty object found for createdAt in purchase:",
-          data.createdAt,
-        );
-        parsedDate = new Date();
-      } else if (data.createdAt) {
-        if (typeof data.createdAt.toDate === "function") {
-          parsedDate = data.createdAt.toDate();
-        } else if (data.createdAt instanceof Date) {
-          parsedDate = data.createdAt;
-        } else {
-          parsedDate = new Date(data.createdAt);
-        }
-      } else {
-        parsedDate = new Date();
-      }
-
-      // Validate the parsed date
-      if (isNaN(parsedDate.getTime())) {
-        console.warn("Invalid date parsed for purchase, using current date");
-        parsedDate = new Date();
-      }
-
-      console.log("Parsed purchase date:", parsedDate);
-    } catch (error) {
-      console.error("Date parsing error for purchase:", error);
-      parsedDate = new Date();
-    }
-
     recentPurchases.push({
       id: purchaseDoc.id,
       kode: data.invoice || `PB-${purchaseDoc.id.slice(-6)}`,
-      tanggal: parsedDate,
+      tanggal: data.createdAt.toDate(),
       total: data.total || 0,
       status: data.status || "Belum Lunas",
       supplier: supplierName,
     });
   }
-
   return recentPurchases;
 };

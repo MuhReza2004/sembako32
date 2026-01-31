@@ -122,7 +122,12 @@ function TambahPenjualanForm() {
       const newId = await addpelanggan(newPelanggan as Pelanggan);
       setPelangganId(newId);
       setShowNewPelangganForm(false);
-      setNewPelanggan({ namaPelanggan: "", namaToko: "", alamat: "", noTelp: "" });
+      setNewPelanggan({
+        namaPelanggan: "",
+        namaToko: "",
+        alamat: "",
+        noTelp: "",
+      });
     } catch (e: any) {
       setError("Gagal menambah pelanggan baru: " + e.message);
     } finally {
@@ -450,75 +455,276 @@ function TambahPenjualanForm() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Main Form */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Invoice Information Card */}
+              {/* Products Section */}
               <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                      <FileText className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        Informasi Dokumen
-                      </h3>
-                      <p className="text-sm text-slate-300">
-                        Nomor invoice dan surat jalan otomatis
-                      </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+                        <Package className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Input Produk</h3>
+                        <p className="text-sm text-emerald-100">
+                          Pilih produk dan jumlah, lalu klik tambah
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <div className="p-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Invoice */}
-                    <div className="group">
-                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <Receipt className="h-4 w-4 text-emerald-600" />
-                        Nomor Invoice
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          value={noInvoice}
-                          readOnly
-                          className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-emerald-300 transition-colors"
-                        />
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      </div>
+                {/* Pelanggan */}
+                <div className="group px-8">
+                  <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                    <UserCircle className="h-4 w-4 text-blue-600" />
+                    Pelanggan
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    onValueChange={(value) => {
+                      if (value === "add_new") {
+                        setShowNewPelangganForm(true);
+                        setPelangganId("");
+                      } else {
+                        setShowNewPelangganForm(false);
+                        setPelangganId(value);
+                      }
+                    }}
+                    value={pelangganId}
+                  >
+                    <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
+                      <SelectValue placeholder="Pilih Pelanggan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="add_new">
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          <span>Tambah Pelanggan Baru</span>
+                        </div>
+                      </SelectItem>
+                      {pelangganList.map((p) => (
+                        <SelectItem
+                          key={p.id || p.namaPelanggan}
+                          value={p.id || ""}
+                        >
+                          <div className="flex items-center gap-2">
+                            <UserCircle className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <div className="font-semibold">
+                                {p.namaPelanggan}
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                {p.namaToko}
+                              </div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {showNewPelangganForm && (
+                  <Card className="p-4 mt-4 bg-slate-50">
+                    <h4 className="font-semibold mb-2">
+                      Tambah Pelanggan Baru
+                    </h4>
+                    <div className="space-y-2">
+                      <Label>Nama Pelanggan</Label>
+                      <Input
+                        value={newPelanggan.namaPelanggan}
+                        onChange={(e) =>
+                          setNewPelanggan({
+                            ...newPelanggan,
+                            namaPelanggan: e.target.value,
+                          })
+                        }
+                      />
+                      <Label>Nama Toko</Label>
+                      <Input
+                        value={newPelanggan.namaToko}
+                        onChange={(e) =>
+                          setNewPelanggan({
+                            ...newPelanggan,
+                            namaToko: e.target.value,
+                          })
+                        }
+                      />
+                      <Label>Alamat</Label>
+                      <Input
+                        value={newPelanggan.alamat}
+                        onChange={(e) =>
+                          setNewPelanggan({
+                            ...newPelanggan,
+                            alamat: e.target.value,
+                          })
+                        }
+                      />
+                      <Label>No. Telepon</Label>
+                      <Input
+                        value={newPelanggan.noTelp}
+                        onChange={(e) =>
+                          setNewPelanggan({
+                            ...newPelanggan,
+                            noTelp: e.target.value,
+                          })
+                        }
+                      />
+                      <Button
+                        onClick={handleAddNewPelanggan}
+                        className="mt-2"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Menyimpan..." : "Simpan Pelanggan"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowNewPelangganForm(false)}
+                      >
+                        Batal
+                      </Button>
                     </div>
-
-                    {/* NPB */}
-                    <div className="group">
-                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                        Nomor Pengambilan Barang (NPB)
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          value={noNPB}
-                          readOnly
-                          className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-blue-300 transition-colors"
-                        />
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  </Card>
+                )}
+                <div className="p-6 space-y-6">
+                  {/* Current Item Input */}
+                  <Card className="p-4 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Package className="h-5 w-5 text-emerald-600" />
+                        <h4 className="font-semibold text-slate-800">
+                          Tambah Produk Baru
+                        </h4>
                       </div>
-                    </div>
-                    {/* Delivery Order */}
-                    {metodePengambilan === "Diantar" && (
-                      <div className="group">
-                        <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                          <Truck className="h-4 w-4 text-purple-600" />
-                          Nomor Delivery Order (DO)
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            value={noDO}
-                            readOnly
-                            className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-purple-300 transition-colors"
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Product Selection */}
+                        <div className="md:col-span-2">
+                          <Label className="text-sm font-medium text-slate-700 mb-2 block">
+                            Pilih Produk
+                          </Label>
+                          <ComboboxSupplierProduk
+                            supplierProdukList={supplierProdukList}
+                            produkList={produkList}
+                            value={currentItem.supplierProdukId}
+                            onChange={(val) =>
+                              setCurrentItem((prev) => ({
+                                ...prev,
+                                supplierProdukId: val,
+                              }))
+                            }
                           />
-                          <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        </div>
+
+                        {/* Quantity Input */}
+                        <div>
+                          <Label className="text-sm font-medium text-slate-700 mb-2 block">
+                            Jumlah
+                          </Label>
+                          <Input
+                            type="text"
+                            min={1}
+                            value={currentItem.qty}
+                            onChange={(e) =>
+                              setCurrentItem((prev) => ({
+                                ...prev,
+                                qty: Number(e.target.value),
+                              }))
+                            }
+                            className="h-12 text-center font-semibold border-2"
+                            placeholder="1"
+                          />
                         </div>
                       </div>
-                    )}
-                  </div>
+
+                      {/* Add Button */}
+                      <Button
+                        onClick={addItemToList}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Tambah ke Daftar
+                      </Button>
+                    </div>
+                  </Card>
+
+                  {/* Items Table */}
+                  {items.length > 0 && (
+                    <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
+                      <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-4 text-white">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          <h4 className="font-semibold">
+                            Daftar Produk ({items.length})
+                          </h4>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Produk</TableHead>
+                              <TableHead>Jumlah</TableHead>
+                              <TableHead>Harga Satuan</TableHead>
+                              <TableHead>Subtotal</TableHead>
+                              <TableHead>Aksi</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {items.map((item, i) => {
+                              const selectedSupplierProduk =
+                                supplierProdukList.find(
+                                  (sp) => sp.id === item.supplierProdukId,
+                                );
+                              const selectedProduk = produkList.find(
+                                (p) =>
+                                  p.id === selectedSupplierProduk?.produkId,
+                              );
+
+                              return (
+                                <TableRow key={i}>
+                                  <TableCell>
+                                    {selectedProduk?.nama ||
+                                      "Produk Tidak Ditemukan"}
+                                  </TableCell>
+                                  <TableCell>{item.qty}</TableCell>
+                                  <TableCell>
+                                    {formatRupiah(item.harga)}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatRupiah(item.subtotal)}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => removeItem(i)}
+                                      className="hover:bg-red-50 hover:text-red-600"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </Card>
+                  )}
+
+                  {items.length === 0 && (
+                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-16 text-center bg-gradient-to-br from-slate-50 to-slate-100">
+                      <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Package className="h-10 w-10 text-slate-400" />
+                      </div>
+                      <p className="text-slate-600 font-semibold text-lg mb-2">
+                        Belum Ada Produk
+                      </p>
+                      <p className="text-sm text-slate-500 mb-4">
+                        Pilih produk di atas dan klik "Tambah ke Daftar"
+                      </p>
+                    </div>
+                  )}
                 </div>
               </Card>
 
@@ -541,119 +747,6 @@ function TambahPenjualanForm() {
                 </div>
 
                 <div className="p-6 space-y-5">
-                  {/* Pelanggan */}
-                  <div className="group">
-                    <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                      <UserCircle className="h-4 w-4 text-blue-600" />
-                      Pelanggan
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      onValueChange={(value) => {
-                        if (value === "add_new") {
-                          setShowNewPelangganForm(true);
-                          setPelangganId("");
-                        } else {
-                          setShowNewPelangganForm(false);
-                          setPelangganId(value);
-                        }
-                      }}
-                      value={pelangganId}
-                    >
-                      <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
-                        <SelectValue placeholder="Pilih Pelanggan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="add_new">
-                          <div className="flex items-center gap-2">
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Pelanggan Baru</span>
-                          </div>
-                        </SelectItem>
-                        {pelangganList.map((p) => (
-                          <SelectItem
-                            key={p.id || p.namaPelanggan}
-                            value={p.id || ""}
-                          >
-                            <div className="flex items-center gap-2">
-                              <UserCircle className="h-4 w-4 text-blue-500" />
-                              <div>
-                                <div className="font-semibold">
-                                  {p.namaPelanggan}
-                                </div>
-                                <div className="text-xs text-slate-500">
-                                  {p.namaToko}
-                                </div>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {showNewPelangganForm && (
-                    <Card className="p-4 mt-4 bg-slate-50">
-                      <h4 className="font-semibold mb-2">
-                        Tambah Pelanggan Baru
-                      </h4>
-                      <div className="space-y-2">
-                        <Label>Nama Pelanggan</Label>
-                        <Input
-                          value={newPelanggan.namaPelanggan}
-                          onChange={(e) =>
-                            setNewPelanggan({
-                              ...newPelanggan,
-                              namaPelanggan: e.target.value,
-                            })
-                          }
-                        />
-                        <Label>Nama Toko</Label>
-                        <Input
-                          value={newPelanggan.namaToko}
-                          onChange={(e) =>
-                            setNewPelanggan({
-                              ...newPelanggan,
-                              namaToko: e.target.value,
-                            })
-                          }
-                        />
-                        <Label>Alamat</Label>
-                        <Input
-                          value={newPelanggan.alamat}
-                          onChange={(e) =>
-                            setNewPelanggan({
-                              ...newPelanggan,
-                              alamat: e.target.value,
-                            })
-                          }
-                        />
-                        <Label>No. Telepon</Label>
-                        <Input
-                          value={newPelanggan.noTelp}
-                          onChange={(e) =>
-                            setNewPelanggan({
-                              ...newPelanggan,
-                              noTelp: e.target.value,
-                            })
-                          }
-                        />
-                        <Button
-                          onClick={handleAddNewPelanggan}
-                          className="mt-2"
-                          disabled={isLoading}
-                        >
-                          {isLoading ? "Menyimpan..." : "Simpan Pelanggan"}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => setShowNewPelangganForm(false)}
-                        >
-                          Batal
-                        </Button>
-                      </div>
-                    </Card>
-                  )}
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Metode Pengambilan */}
                     <div className="group">
@@ -833,166 +926,75 @@ function TambahPenjualanForm() {
                   </div>
                 </div>
               </Card>
-
-              {/* Products Section */}
+              {/* Invoice Information Card */}
               <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                        <Package className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">Input Produk</h3>
-                        <p className="text-sm text-emerald-100">
-                          Pilih produk dan jumlah, lalu klik tambah
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        Informasi Dokumen
+                      </h3>
+                      <p className="text-sm text-slate-300">
+                        Nomor invoice dan surat jalan otomatis
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-6 space-y-6">
-                  {/* Current Item Input */}
-                  <Card className="p-4 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Package className="h-5 w-5 text-emerald-600" />
-                        <h4 className="font-semibold text-slate-800">
-                          Tambah Produk Baru
-                        </h4>
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Invoice */}
+                    <div className="group">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                        <Receipt className="h-4 w-4 text-emerald-600" />
+                        Nomor Invoice
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          value={noInvoice}
+                          readOnly
+                          className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-emerald-300 transition-colors"
+                        />
+                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Product Selection */}
-                        <div className="md:col-span-2">
-                          <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                            Pilih Produk
-                          </Label>
-                          <ComboboxSupplierProduk
-                            supplierProdukList={supplierProdukList}
-                            produkList={produkList}
-                            value={currentItem.supplierProdukId}
-                            onChange={(val) =>
-                              setCurrentItem((prev) => ({
-                                ...prev,
-                                supplierProdukId: val,
-                              }))
-                            }
-                          />
-                        </div>
-
-                        {/* Quantity Input */}
-                        <div>
-                          <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                            Jumlah
-                          </Label>
+                    {/* NPB */}
+                    <div className="group">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        Nomor Pengambilan Barang (NPB)
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          value={noNPB}
+                          readOnly
+                          className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-blue-300 transition-colors"
+                        />
+                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      </div>
+                    </div>
+                    {/* Delivery Order */}
+                    {metodePengambilan === "Diantar" && (
+                      <div className="group">
+                        <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                          <Truck className="h-4 w-4 text-purple-600" />
+                          Nomor Delivery Order (DO)
+                        </Label>
+                        <div className="relative">
                           <Input
-                            type="number"
-                            min={1}
-                            value={currentItem.qty}
-                            onChange={(e) =>
-                              setCurrentItem((prev) => ({
-                                ...prev,
-                                qty: Number(e.target.value),
-                              }))
-                            }
-                            className="h-12 text-center font-semibold border-2"
-                            placeholder="1"
+                            value={noDO}
+                            readOnly
+                            className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-purple-300 transition-colors"
                           />
+                          <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         </div>
                       </div>
-
-                      {/* Add Button */}
-                      <Button
-                        onClick={addItemToList}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Tambah ke Daftar
-                      </Button>
-                    </div>
-                  </Card>
-
-                  {/* Items Table */}
-                  {items.length > 0 && (
-                    <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
-                      <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-4 text-white">
-                        <div className="flex items-center gap-2">
-                          <Package className="h-5 w-5" />
-                          <h4 className="font-semibold">
-                            Daftar Produk ({items.length})
-                          </h4>
-                        </div>
-                      </div>
-
-                      <div className="p-4">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Produk</TableHead>
-                              <TableHead>Jumlah</TableHead>
-                              <TableHead>Harga Satuan</TableHead>
-                              <TableHead>Subtotal</TableHead>
-                              <TableHead>Aksi</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {items.map((item, i) => {
-                              const selectedSupplierProduk =
-                                supplierProdukList.find(
-                                  (sp) => sp.id === item.supplierProdukId,
-                                );
-                              const selectedProduk = produkList.find(
-                                (p) =>
-                                  p.id === selectedSupplierProduk?.produkId,
-                              );
-
-                              return (
-                                <TableRow key={i}>
-                                  <TableCell>
-                                    {selectedProduk?.nama ||
-                                      "Produk Tidak Ditemukan"}
-                                  </TableCell>
-                                  <TableCell>{item.qty}</TableCell>
-                                  <TableCell>
-                                    {formatRupiah(item.harga)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatRupiah(item.subtotal)}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => removeItem(i)}
-                                      className="hover:bg-red-50 hover:text-red-600"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </Card>
-                  )}
-
-                  {items.length === 0 && (
-                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-16 text-center bg-gradient-to-br from-slate-50 to-slate-100">
-                      <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Package className="h-10 w-10 text-slate-400" />
-                      </div>
-                      <p className="text-slate-600 font-semibold text-lg mb-2">
-                        Belum Ada Produk
-                      </p>
-                      <p className="text-sm text-slate-500 mb-4">
-                        Pilih produk di atas dan klik "Tambah ke Daftar"
-                      </p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </Card>
             </div>
