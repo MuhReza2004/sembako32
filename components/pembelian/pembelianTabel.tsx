@@ -32,7 +32,17 @@ import DialogDetailPembelian from "./DialogDetailPembelian";
 import DialogEditPembelian from "./DialogEditPembelian";
 import { getAllPembelian } from "@/app/services/pembelian.service";
 
-export default function PembelianTable({ data }: { data: Pembelian[] }) {
+export default function PembelianTable({
+  data,
+  searchTerm,
+  startDate,
+  endDate,
+}: {
+  data: Pembelian[];
+  searchTerm: string;
+  startDate: string;
+  endDate: string;
+}) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Produk[]>([]);
   const [supplierProduks, setSupplierProduks] = useState<SupplierProduk[]>([]);
@@ -42,6 +52,8 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [localData, setLocalData] = useState<Pembelian[]>(data);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     setLocalData(data);
@@ -64,9 +76,47 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
     fetchData();
   }, []);
 
+  const filteredData = useMemo(() => {
+    let filtered = localData;
+
+    if (searchTerm) {
+      const lowercasedTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) => {
+        const supplierName =
+          suppliers.find((s) => s.id === p.supplierId)?.nama || "";
+        return (
+          p.invoice?.toLowerCase().includes(lowercasedTerm) ||
+          p.noDO?.toLowerCase().includes(lowercasedTerm) ||
+          supplierName.toLowerCase().includes(lowercasedTerm)
+        );
+      });
+    }
+
+    if (startDate) {
+      filtered = filtered.filter(
+        (p) => new Date(p.tanggal) >= new Date(startDate),
+      );
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((p) => new Date(p.tanggal) <= end);
+    }
+
+    return filtered;
+  }, [localData, searchTerm, startDate, endDate, suppliers]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage]);
+
+
   // Hitung total per bulan
   const totalPerBulan = useMemo(() => {
-    const grouped = localData.reduce(
+    const grouped = filteredData.reduce(
       (acc, p) => {
         const date = new Date(p.tanggal);
         const bulanTahun = `${date.getFullYear()}-${String(
@@ -97,12 +147,12 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
     );
 
     return Object.values(grouped).sort((a, b) => b.nama.localeCompare(a.nama));
-  }, [localData]);
+  }, [filteredData]);
 
   // Hitung grand total
   const grandTotal = useMemo(() => {
-    return localData.reduce((sum, p) => sum + p.total, 0);
-  }, [localData]);
+    return filteredData.reduce((sum, p) => sum + p.total, 0);
+  }, [filteredData]);
 
   return (
     <div className="space-y-4">
@@ -164,7 +214,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {localData.length === 0 ? (
+            {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={11}
@@ -175,11 +225,15 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
                 </TableCell>
               </TableRow>
             ) : (
-              localData.map((p, idx) => (
+              paginatedData.map((p, idx) => (
                 <TableRow
                   key={p.id}
                   className={`hover:bg-blue-50/50 transition-colors ${
-                    idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                    p.status === "Pending"
+                      ? "bg-red-50"
+                      : idx % 2 === 0
+                        ? "bg-white"
+                        : "bg-gray-50/50"
                   }`}
                 >
                   <TableCell className="font-medium text-gray-900">
@@ -338,7 +392,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
               ))
             )}
           </TableBody>
-          {localData.length > 0 && (
+          {paginatedData.length > 0 && (
             <TableFooter>
               <TableRow className=" bg-green-600">
                 <TableCell
@@ -360,8 +414,32 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
         </Table>
       </div>
 
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Sebelumnya
+        </Button>
+        <span className="text-sm">
+          Halaman {currentPage} dari {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Berikutnya
+        </Button>
+      </div>
+
       {/* Summary Card - Total Per Bulan */}
-      {localData.length > 0 && totalPerBulan.length > 0 && (
+      {filteredData.length > 0 && totalPerBulan.length > 0 && (
         <div className="rounded-lg border border-gray-200 overflow-hidden shadow-sm bg-white">
           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-gray-200">
             <h3 className="font-bold text-gray-800 flex items-center gap-2">
@@ -413,4 +491,3 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
     </div>
   );
 }
-

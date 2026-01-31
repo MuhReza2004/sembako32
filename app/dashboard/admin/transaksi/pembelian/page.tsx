@@ -8,11 +8,16 @@ import { Pembelian } from "@/app/types/pembelian";
 import PembelianTable from "@/components/pembelian/pembelianTabel";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function PagePembelian() {
   const [data, setData] = useState<Pembelian[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const loadData = async () => {
     setLoading(true);
@@ -47,6 +52,37 @@ export default function PagePembelian() {
           Tambah Pembelian
         </Button>
       </div>
+
+      <div className="flex items-center gap-4">
+        <div className="w-1/3">
+          <Label htmlFor="search">Cari (Invoice / Supplier)</Label>
+          <Input
+            id="search"
+            placeholder="Ketik untuk mencari..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="w-1/4">
+          <Label htmlFor="startDate">Tanggal Mulai</Label>
+          <Input
+            id="startDate"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+        <div className="w-1/4">
+          <Label htmlFor="endDate">Tanggal Akhir</Label>
+          <Input
+            id="endDate"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+
       {loading ? (
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
@@ -55,7 +91,12 @@ export default function PagePembelian() {
           </div>
         </div>
       ) : (
-        <PembelianTable data={data} />
+        <PembelianTable
+          data={data}
+          searchTerm={searchTerm}
+          startDate={startDate}
+          endDate={endDate}
+        />
       )}
     </div>
   );
