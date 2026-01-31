@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import { formatRupiah } from "@/helper/format";
@@ -55,6 +55,14 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ComboboxSupplierProduk } from "@/components/ui/combobox-supplier-produk";
 import { addpelanggan } from "@/app/services/pelanggan.service";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -111,6 +119,7 @@ function TambahPenjualanForm() {
     alamat: "",
     noTelp: "",
   });
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleAddNewPelanggan = async () => {
     if (!newPelanggan.namaPelanggan) {
@@ -728,7 +737,6 @@ function TambahPenjualanForm() {
                 </div>
               </Card>
 
-              {/* Customer & Transaction Details */}
               <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
                   <div className="flex items-center gap-3">
@@ -747,6 +755,119 @@ function TambahPenjualanForm() {
                 </div>
 
                 <div className="p-6 space-y-5">
+                  {/* Pelanggan */}
+                  <div className="group">
+                    <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                      <UserCircle className="h-4 w-4 text-blue-600" />
+                      Pelanggan
+                      <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      onValueChange={(value) => {
+                        if (value === "add_new") {
+                          setShowNewPelangganForm(true);
+                          setPelangganId("");
+                        } else {
+                          setShowNewPelangganForm(false);
+                          setPelangganId(value);
+                        }
+                      }}
+                      value={pelangganId}
+                    >
+                      <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
+                        <SelectValue placeholder="Pilih Pelanggan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="add_new">
+                          <div className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            <span>Tambah Pelanggan Baru</span>
+                          </div>
+                        </SelectItem>
+                        {pelangganList.map((p) => (
+                          <SelectItem
+                            key={p.id || p.namaPelanggan}
+                            value={p.id || ""}
+                          >
+                            <div className="flex items-center gap-2">
+                              <UserCircle className="h-4 w-4 text-blue-500" />
+                              <div>
+                                <div className="font-semibold">
+                                  {p.namaPelanggan}
+                                </div>
+                                <div className="text-xs text-slate-500">
+                                  {p.namaToko}
+                                </div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {showNewPelangganForm && (
+                    <Card className="p-4 mt-4 bg-slate-50">
+                      <h4 className="font-semibold mb-2">
+                        Tambah Pelanggan Baru
+                      </h4>
+                      <div className="space-y-2">
+                        <Label>Nama Pelanggan</Label>
+                        <Input
+                          value={newPelanggan.namaPelanggan}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              namaPelanggan: e.target.value,
+                            })
+                          }
+                        />
+                        <Label>Nama Toko</Label>
+                        <Input
+                          value={newPelanggan.namaToko}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              namaToko: e.target.value,
+                            })
+                          }
+                        />
+                        <Label>Alamat</Label>
+                        <Input
+                          value={newPelanggan.alamat}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              alamat: e.target.value,
+                            })
+                          }
+                        />
+                        <Label>No. Telepon</Label>
+                        <Input
+                          value={newPelanggan.noTelp}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              noTelp: e.target.value,
+                            })
+                          }
+                        />
+                        <Button
+                          onClick={handleAddNewPelanggan}
+                          className="mt-2"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Menyimpan..." : "Simpan Pelanggan"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowNewPelangganForm(false)}
+                        >
+                          Batal
+                        </Button>
+                      </div>
+                    </Card>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Metode Pengambilan */}
                     <div className="group">
@@ -831,7 +952,7 @@ function TambahPenjualanForm() {
                   </div>
 
                   {/* Bank Details - Collapsible */}
-                  {metodePembayaran === "transfer" && (
+                  {metodePembayaran === "Transfer" && (
                     <div className="animate-in slide-in-from-top duration-300">
                       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
                         <div className="p-4">
@@ -923,77 +1044,6 @@ function TambahPenjualanForm() {
                       rows={3}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 transition-all resize-none group-hover:border-slate-300"
                     />
-                  </div>
-                </div>
-              </Card>
-              {/* Invoice Information Card */}
-              <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                      <FileText className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        Informasi Dokumen
-                      </h3>
-                      <p className="text-sm text-slate-300">
-                        Nomor invoice dan surat jalan otomatis
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Invoice */}
-                    <div className="group">
-                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <Receipt className="h-4 w-4 text-emerald-600" />
-                        Nomor Invoice
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          value={noInvoice}
-                          readOnly
-                          className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-emerald-300 transition-colors"
-                        />
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      </div>
-                    </div>
-
-                    {/* NPB */}
-                    <div className="group">
-                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                        Nomor Pengambilan Barang (NPB)
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          value={noNPB}
-                          readOnly
-                          className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-blue-300 transition-colors"
-                        />
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      </div>
-                    </div>
-                    {/* Delivery Order */}
-                    {metodePengambilan === "Diantar" && (
-                      <div className="group">
-                        <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                          <Truck className="h-4 w-4 text-purple-600" />
-                          Nomor Delivery Order (DO)
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            value={noDO}
-                            readOnly
-                            className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-purple-300 transition-colors"
-                          />
-                          <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </Card>
@@ -1161,7 +1211,7 @@ function TambahPenjualanForm() {
               {/* Action Buttons */}
               <div className="space-y-3">
                 <Button
-                  onClick={submit}
+                  onClick={() => setShowPreview(true)}
                   disabled={isLoading || !pelangganId || items.length === 0}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
@@ -1191,6 +1241,146 @@ function TambahPenjualanForm() {
           </div>
         </div>
       </div>
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Preview Transaksi</DialogTitle>
+            <DialogDescription>
+              Harap periksa kembali detail transaksi sebelum melanjutkan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto p-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informasi Pelanggan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  <span className="font-semibold">Nama:</span>{" "}
+                  {selectedPelanggan?.namaPelanggan}
+                </p>
+                <p>
+                  <span className="font-semibold">Toko:</span>{" "}
+                  {selectedPelanggan?.namaToko}
+                </p>
+                <p>
+                  <span className="font-semibold">Alamat:</span>{" "}
+                  {selectedPelanggan?.alamat}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Detail Produk</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Produk</TableHead>
+                      <TableHead>Jumlah</TableHead>
+                      <TableHead>Harga</TableHead>
+                      <TableHead>Subtotal</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((item, i) => {
+                      const selectedSupplierProduk = supplierProdukList.find(
+                        (sp) => sp.id === item.supplierProdukId,
+                      );
+                      const selectedProduk = produkList.find(
+                        (p) => p.id === selectedSupplierProduk?.produkId,
+                      );
+                      return (
+                        <TableRow key={i}>
+                          <TableCell>{selectedProduk?.nama || "N/A"}</TableCell>
+                          <TableCell>{item.qty}</TableCell>
+                          <TableCell>{formatRupiah(item.harga)}</TableCell>
+                          <TableCell>{formatRupiah(item.subtotal)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Ringkasan Pembayaran</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+                    <span className="text-sm text-slate-600">
+                      Metode Pembayaran
+                    </span>
+                    <span className="font-semibold text-slate-800 text-lg">
+                      {metodePembayaran || "Belum dipilih"}
+                    </span>
+                  </div>
+                  {metodePembayaran === "Transfer" && (
+                    <div className="space-y-2 mt-3 pt-3 border-t">
+                      <p className="flex justify-between text-sm">
+                        <span className="font-semibold text-slate-500">
+                          Nama Bank:
+                        </span>
+                        <span>{namaBank}</span>
+                      </p>
+                      <p className="flex justify-between text-sm">
+                        <span className="font-semibold text-slate-500">
+                          Atas Nama:
+                        </span>
+                        <span>{namaPemilikRekening}</span>
+                      </p>
+                      <p className="flex justify-between text-sm">
+                        <span className="font-semibold text-slate-500">
+                          No. Rekening:
+                        </span>
+                        <span>{nomorRekening}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>{formatRupiah(subTotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Diskon ({diskon}%)</span>
+                    <span className="text-red-500">
+                      -{formatRupiah(totalDiskon)}
+                    </span>
+                  </div>
+                  {pajakEnabled && (
+                    <div className="flex justify-between">
+                      <span>Pajak (11%)</span>
+                      <span>{formatRupiah(totalPajak)}</span>
+                    </div>
+                  )}
+                  <Separator className="my-2" />
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total Akhir</span>
+                    <span>{formatRupiah(total)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPreview(false)}
+              disabled={isLoading}
+            >
+              Batal
+            </Button>
+            <Button onClick={submit} disabled={isLoading}>
+              {isLoading ? "Memproses..." : "Lanjutkan Proses"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
