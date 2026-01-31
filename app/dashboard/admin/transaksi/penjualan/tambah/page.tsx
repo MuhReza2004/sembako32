@@ -53,6 +53,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { ComboboxSupplierProduk } from "@/components/ui/combobox-supplier-produk";
+import { addpelanggan } from "@/app/services/pelanggan.service";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function TambahPenjualanForm() {
   const router = useRouter();
@@ -94,6 +104,31 @@ function TambahPenjualanForm() {
   const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState("");
   const [pajakEnabled, setPajakEnabled] = useState(false);
   const [diskon, setDiskon] = useState(0);
+  const [showNewPelangganForm, setShowNewPelangganForm] = useState(false);
+  const [newPelanggan, setNewPelanggan] = useState({
+    namaPelanggan: "",
+    namaToko: "",
+    alamat: "",
+    noTelp: "",
+  });
+
+  const handleAddNewPelanggan = async () => {
+    if (!newPelanggan.namaPelanggan) {
+      setError("Nama pelanggan harus diisi.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const newId = await addpelanggan(newPelanggan as Pelanggan);
+      setPelangganId(newId);
+      setShowNewPelangganForm(false);
+      setNewPelanggan({ namaPelanggan: "", namaToko: "", alamat: "", noTelp: "" });
+    } catch (e: any) {
+      setError("Gagal menambah pelanggan baru: " + e.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const resetForm = () => {
     setPelangganId("");
@@ -513,11 +548,28 @@ function TambahPenjualanForm() {
                       Pelanggan
                       <span className="text-red-500">*</span>
                     </Label>
-                    <Select onValueChange={setPelangganId} value={pelangganId}>
+                    <Select
+                      onValueChange={(value) => {
+                        if (value === "add_new") {
+                          setShowNewPelangganForm(true);
+                          setPelangganId("");
+                        } else {
+                          setShowNewPelangganForm(false);
+                          setPelangganId(value);
+                        }
+                      }}
+                      value={pelangganId}
+                    >
                       <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
                         <SelectValue placeholder="Pilih Pelanggan" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="add_new">
+                          <div className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            <span>Tambah Pelanggan Baru</span>
+                          </div>
+                        </SelectItem>
                         {pelangganList.map((p) => (
                           <SelectItem
                             key={p.id || p.namaPelanggan}
@@ -539,6 +591,68 @@ function TambahPenjualanForm() {
                       </SelectContent>
                     </Select>
                   </div>
+                  {showNewPelangganForm && (
+                    <Card className="p-4 mt-4 bg-slate-50">
+                      <h4 className="font-semibold mb-2">
+                        Tambah Pelanggan Baru
+                      </h4>
+                      <div className="space-y-2">
+                        <Label>Nama Pelanggan</Label>
+                        <Input
+                          value={newPelanggan.namaPelanggan}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              namaPelanggan: e.target.value,
+                            })
+                          }
+                        />
+                        <Label>Nama Toko</Label>
+                        <Input
+                          value={newPelanggan.namaToko}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              namaToko: e.target.value,
+                            })
+                          }
+                        />
+                        <Label>Alamat</Label>
+                        <Input
+                          value={newPelanggan.alamat}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              alamat: e.target.value,
+                            })
+                          }
+                        />
+                        <Label>No. Telepon</Label>
+                        <Input
+                          value={newPelanggan.noTelp}
+                          onChange={(e) =>
+                            setNewPelanggan({
+                              ...newPelanggan,
+                              noTelp: e.target.value,
+                            })
+                          }
+                        />
+                        <Button
+                          onClick={handleAddNewPelanggan}
+                          className="mt-2"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Menyimpan..." : "Simpan Pelanggan"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowNewPelangganForm(false)}
+                        >
+                          Batal
+                        </Button>
+                      </div>
+                    </Card>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Metode Pengambilan */}
@@ -755,52 +869,17 @@ function TambahPenjualanForm() {
                           <Label className="text-sm font-medium text-slate-700 mb-2 block">
                             Pilih Produk
                           </Label>
-                          <Select
-                            onValueChange={(val) =>
+                          <ComboboxSupplierProduk
+                            supplierProdukList={supplierProdukList}
+                            produkList={produkList}
+                            value={currentItem.supplierProdukId}
+                            onChange={(val) =>
                               setCurrentItem((prev) => ({
                                 ...prev,
                                 supplierProdukId: val,
                               }))
                             }
-                            value={currentItem.supplierProdukId}
-                          >
-                            <SelectTrigger className="h-12 border-2">
-                              <SelectValue placeholder="Pilih Produk" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {supplierProdukList.map((sp) => {
-                                const produk = produkList.find(
-                                  (p) => p.id === sp.produkId,
-                                );
-                                return (
-                                  <SelectItem
-                                    key={sp.id}
-                                    value={sp.id}
-                                    disabled={sp.stok === 0}
-                                  >
-                                    <div className="flex justify-between items-center w-full gap-4">
-                                      <span className="font-medium">
-                                        {produk?.nama ||
-                                          "Produk Tidak Ditemukan"}
-                                      </span>
-                                      <Badge
-                                        variant={
-                                          sp.stok > 10
-                                            ? "default"
-                                            : sp.stok > 0
-                                              ? "outline"
-                                              : "destructive"
-                                        }
-                                        className="text-xs"
-                                      >
-                                        Stok: {sp.stok}
-                                      </Badge>
-                                    </div>
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
+                          />
                         </div>
 
                         {/* Quantity Input */}
@@ -848,79 +927,55 @@ function TambahPenjualanForm() {
                       </div>
 
                       <div className="p-4">
-                        <div className="space-y-3">
-                          {items.map((item, i) => {
-                            const selectedSupplierProduk =
-                              supplierProdukList.find(
-                                (sp) => sp.id === item.supplierProdukId,
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Produk</TableHead>
+                              <TableHead>Jumlah</TableHead>
+                              <TableHead>Harga Satuan</TableHead>
+                              <TableHead>Subtotal</TableHead>
+                              <TableHead>Aksi</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {items.map((item, i) => {
+                              const selectedSupplierProduk =
+                                supplierProdukList.find(
+                                  (sp) => sp.id === item.supplierProdukId,
+                                );
+                              const selectedProduk = produkList.find(
+                                (p) =>
+                                  p.id === selectedSupplierProduk?.produkId,
                               );
-                            const selectedProduk = produkList.find(
-                              (p) => p.id === selectedSupplierProduk?.produkId,
-                            );
 
-                            return (
-                              <Card
-                                key={i}
-                                className="p-4 border-2 hover:border-slate-300 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-white to-slate-50"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    {/* Product Name */}
-                                    <div>
-                                      <Label className="text-xs font-medium text-slate-600 mb-1 block">
-                                        Produk
-                                      </Label>
-                                      <div className="font-semibold text-slate-800">
-                                        {selectedProduk?.nama ||
-                                          "Produk Tidak Ditemukan"}
-                                      </div>
-                                    </div>
-
-                                    {/* Quantity */}
-                                    <div>
-                                      <Label className="text-xs font-medium text-slate-600 mb-1 block">
-                                        Jumlah
-                                      </Label>
-                                      <div className="font-semibold text-slate-800">
-                                        {item.qty}
-                                      </div>
-                                    </div>
-
-                                    {/* Unit Price */}
-                                    <div>
-                                      <Label className="text-xs font-medium text-slate-600 mb-1 block">
-                                        Harga Satuan
-                                      </Label>
-                                      <div className="font-semibold text-slate-800">
-                                        {formatRupiah(item.harga)}
-                                      </div>
-                                    </div>
-
-                                    {/* Subtotal */}
-                                    <div>
-                                      <Label className="text-xs font-medium text-slate-600 mb-1 block">
-                                        Subtotal
-                                      </Label>
-                                      <div className="font-bold text-emerald-700">
-                                        {formatRupiah(item.subtotal)}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Remove Button */}
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => removeItem(i)}
-                                    className="ml-4 hover:bg-red-50 hover:text-red-600"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </Card>
-                            );
-                          })}
-                        </div>
+                              return (
+                                <TableRow key={i}>
+                                  <TableCell>
+                                    {selectedProduk?.nama ||
+                                      "Produk Tidak Ditemukan"}
+                                  </TableCell>
+                                  <TableCell>{item.qty}</TableCell>
+                                  <TableCell>
+                                    {formatRupiah(item.harga)}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatRupiah(item.subtotal)}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => removeItem(i)}
+                                      className="hover:bg-red-50 hover:text-red-600"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
                       </div>
                     </Card>
                   )}

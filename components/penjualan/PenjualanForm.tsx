@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+import { ComboboxProduk } from "@/components/ui/combobox-produk";
 import { Card } from "@/components/ui/card";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
@@ -595,37 +595,13 @@ export default function PenjualanForm({
                           <Label className="md:hidden text-xs text-gray-600">
                             Produk
                           </Label>
-                          <Select
-                            onValueChange={(val) =>
+                          <ComboboxProduk
+                            produkList={produkList}
+                            value={item.supplierProdukId}
+                            onChange={(val) =>
                               updateItem(i, "supplierProdukId", val)
                             }
-                            value={item.supplierProdukId}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Pilih Produk" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {produkList.map((p) => (
-                                <SelectItem
-                                  key={p.id}
-                                  value={p.id}
-                                  disabled={p.stok === 0}
-                                >
-                                  <div className="flex justify-between items-center w-full">
-                                    <span>{p.nama}</span>
-                                    <Badge
-                                      variant={
-                                        p.stok > 0 ? "outline" : "destructive"
-                                      }
-                                      className="ml-2"
-                                    >
-                                      Stok: {p.stok}
-                                    </Badge>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          />
                         </div>
 
                         {/* Qty */}
