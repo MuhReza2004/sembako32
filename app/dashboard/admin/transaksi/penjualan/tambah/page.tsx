@@ -6,7 +6,8 @@ import {
   createPenjualan,
   updatePenjualan,
   generateInvoiceNumber,
-  generateSuratJalanNumber,
+  generateNPBNumber,
+  generateDONumber,
   getAllPenjualan,
 } from "@/app/services/penjualan.service";
 import { PenjualanDetail, Penjualan } from "@/app/types/penjualan";
@@ -47,6 +48,7 @@ import {
   TrendingUp,
   ShoppingCart,
   Calculator,
+  Truck,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +62,11 @@ function TambahPenjualanForm() {
   const [pelangganId, setPelangganId] = useState("");
   const [catatan, setCatatan] = useState("");
   const [noInvoice, setNoInvoice] = useState("Generating...");
-  const [noSuratJalan, setNoSuratJalan] = useState("Generating...");
+  const [noNPB, setNoNPB] = useState("Generating...");
+  const [noDO, setNoDO] = useState("Generating...");
+  const [metodePengambilan, setMetodePengambilan] = useState<
+    "Ambil Langsung" | "Diantar"
+  >("Ambil Langsung");
   const [supplierProdukList, setSupplierProdukList] = useState<
     SupplierProduk[]
   >([]);
@@ -95,6 +101,7 @@ function TambahPenjualanForm() {
     setItems([]);
     setStatus("Lunas");
     setMetodePembayaran("");
+    setMetodePengambilan("Ambil Langsung");
     setNamaBank("BNI");
     setNamaPemilikRekening("RIZAL");
     setNomorRekening("19530117106");
@@ -104,7 +111,8 @@ function TambahPenjualanForm() {
     setError(null);
     if (!editingPenjualan) {
       generateInvoiceNumber().then(setNoInvoice);
-      generateSuratJalanNumber().then(setNoSuratJalan);
+      generateNPBNumber().then(setNoNPB);
+      generateDONumber().then(setNoDO);
     }
   };
 
@@ -157,7 +165,9 @@ function TambahPenjualanForm() {
           setPelangganId(penjualan.pelangganId);
           setCatatan(penjualan.catatan || "");
           setNoInvoice(penjualan.noInvoice);
-          setNoSuratJalan(penjualan.noSuratJalan);
+          setNoNPB(penjualan.noNPB);
+          setNoDO(penjualan.noDO || "");
+          setMetodePengambilan(penjualan.metodePengambilan || "Ambil Langsung");
           setItems(penjualan.items || []);
           setStatus(penjualan.status);
           setMetodePembayaran(penjualan.metodePembayaran || "");
@@ -305,11 +315,16 @@ function TambahPenjualanForm() {
         pelangganId,
         catatan: catatan,
         noInvoice,
-        noSuratJalan,
+        noNPB: noNPB,
+        metodePengambilan,
         total,
         status,
         items,
       };
+
+      if (metodePengambilan === "Diantar") {
+        penjualanData.noDO = noDO;
+      }
 
       if (metodePembayaran) penjualanData.metodePembayaran = metodePembayaran;
       if (namaBank) penjualanData.namaBank = namaBank;
@@ -436,21 +451,38 @@ function TambahPenjualanForm() {
                       </div>
                     </div>
 
-                    {/* Surat Jalan */}
+                    {/* NPB */}
                     <div className="group">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
                         <FileText className="h-4 w-4 text-blue-600" />
-                        Nomor Surat Jalan
+                        Nomor Pengambilan Barang (NPB)
                       </Label>
                       <div className="relative">
                         <Input
-                          value={noSuratJalan}
+                          value={noNPB}
                           readOnly
                           className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-blue-300 transition-colors"
                         />
                         <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                       </div>
                     </div>
+                    {/* Delivery Order */}
+                    {metodePengambilan === "Diantar" && (
+                      <div className="group">
+                        <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                          <Truck className="h-4 w-4 text-purple-600" />
+                          Nomor Delivery Order (DO)
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            value={noDO}
+                            readOnly
+                            className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 font-mono font-bold text-lg pl-10 group-hover:border-purple-300 transition-colors"
+                          />
+                          <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -509,6 +541,27 @@ function TambahPenjualanForm() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Metode Pengambilan */}
+                    <div className="group">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                        <Truck className="h-4 w-4 text-purple-600" />
+                        Metode Pengambilan
+                      </Label>
+                      <Select
+                        onValueChange={(v: any) => setMetodePengambilan(v)}
+                        value={metodePengambilan}
+                      >
+                        <SelectTrigger className="h-12 border-2 group-hover:border-purple-300 transition-colors">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Ambil Langsung">
+                            Ambil Langsung
+                          </SelectItem>
+                          <SelectItem value="Diantar">Diantar</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     {/* Status Pembayaran */}
                     <div className="group">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
@@ -553,13 +606,13 @@ function TambahPenjualanForm() {
                           <SelectValue placeholder="Pilih Metode" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="tunai">
+                          <SelectItem value="Tunai">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                               Tunai
                             </div>
                           </SelectItem>
-                          <SelectItem value="transfer">
+                          <SelectItem value="Transfer">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                               Transfer Bank

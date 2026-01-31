@@ -5,6 +5,8 @@ import {
   createPenjualan,
   updatePenjualan,
   generateInvoiceNumber,
+  generateNPBNumber,
+  generateDONumber,
 } from "@/app/services/penjualan.service";
 import { PenjualanDetail, Penjualan } from "@/app/types/penjualan";
 import { Produk } from "@/app/types/produk";
@@ -32,6 +34,7 @@ import {
   Package,
   CreditCard,
   CheckCircle2,
+  Truck,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +66,8 @@ export default function PenjualanForm({
   const [namaToko, setNamaToko] = useState("");
   const [alamatPelanggan, setAlamatPelanggan] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [npbNumber, setNpbNumber] = useState("");
+  const [doNumber, setDoNumber] = useState("");
   const [produkList, setProdukList] = useState<Produk[]>([]);
   const [pelangganList, setPelangganList] = useState<Pelanggan[]>([]);
   const [items, setItems] = useState<PenjualanDetail[]>([]);
@@ -70,6 +75,9 @@ export default function PenjualanForm({
   const [metodePembayaran, setMetodePembayaran] = useState<
     "Tunai" | "Transfer"
   >("Tunai");
+  const [metodePengambilan, setMetodePengambilan] = useState<
+    "Ambil Langsung" | "Diantar"
+  >("Ambil Langsung");
   const [nomorRekening, setNomorRekening] = useState("");
   const [namaBank, setNamaBank] = useState("");
   const [namaPemilikRekening, setNamaPemilikRekening] = useState("");
@@ -87,6 +95,7 @@ export default function PenjualanForm({
     setItems([]);
     setStatus("Lunas");
     setMetodePembayaran("Tunai");
+    setMetodePengambilan("Ambil Langsung");
     setNomorRekening("1953017106");
     setNamaBank("BNI");
     setNamaPemilikRekening("RIZAL");
@@ -96,6 +105,8 @@ export default function PenjualanForm({
     setError(null);
     if (!editingPenjualan) {
       generateInvoiceNumber().then(setInvoiceNumber);
+      generateNPBNumber().then(setNpbNumber);
+      generateDONumber().then(setDoNumber);
     }
   };
 
@@ -108,6 +119,9 @@ export default function PenjualanForm({
         setNamaPelanggan(penj.namaPelanggan || "");
         setAlamatPelanggan(penj.alamatPelanggan || "");
         setInvoiceNumber(penj.noInvoice || "");
+        setNpbNumber(penj.noNPB || "");
+        setDoNumber(penj.noDO || "");
+        setMetodePengambilan(penj.metodePengambilan || "Ambil Langsung");
         setItems(penj.items || []);
         setStatus((penj.status as "Lunas" | "Belum Lunas") || "Lunas");
         setMetodePembayaran(
@@ -231,6 +245,7 @@ export default function PenjualanForm({
     try {
       const penjualanData: any = {
         nomorInvoice: invoiceNumber,
+        noNPB: npbNumber,
         pelangganId,
         namaPelanggan,
         namaToko,
@@ -245,8 +260,13 @@ export default function PenjualanForm({
         totalAkhir,
         status,
         metodePembayaran,
+        metodePengambilan,
         pajakEnabled,
       };
+
+      if (metodePengambilan === "Diantar") {
+        penjualanData.noDO = doNumber;
+      }
 
       // Only include bank details if payment method is Transfer
       if (metodePembayaran === "Transfer") {
@@ -307,7 +327,7 @@ export default function PenjualanForm({
           )}
 
           {/* INFO SECTION */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Invoice */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -320,6 +340,32 @@ export default function PenjualanForm({
                 className="bg-gray-50 font-mono font-semibold"
               />
             </div>
+            {/* NPB */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-gray-600" />
+                Nomor Pengambilan Barang (NPB)
+              </Label>
+              <Input
+                value={npbNumber}
+                readOnly
+                className="bg-gray-50 font-mono font-semibold"
+              />
+            </div>
+            {/* Delivery Order */}
+            {metodePengambilan === "Diantar" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Receipt className="h-4 w-4 text-gray-600" />
+                  Nomor Delivery Order (DO)
+                </Label>
+                <Input
+                  value={doNumber}
+                  readOnly
+                  className="bg-gray-50 font-mono font-semibold"
+                />
+              </div>
+            )}
 
             {/* Pelanggan */}
             <div className="space-y-2">
@@ -370,6 +416,26 @@ export default function PenjualanForm({
                 <SelectContent>
                   <SelectItem value="Lunas">Lunas</SelectItem>
                   <SelectItem value="Belum Lunas">Belum Lunas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Metode Pengambilan */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Truck className="h-4 w-4 text-gray-600" />
+                Metode Pengambilan
+              </Label>
+              <Select
+                onValueChange={(v: any) => setMetodePengambilan(v)}
+                value={metodePengambilan}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ambil Langsung">Ambil Langsung</SelectItem>
+                  <SelectItem value="Diantar">Diantar</SelectItem>
                 </SelectContent>
               </Select>
             </div>

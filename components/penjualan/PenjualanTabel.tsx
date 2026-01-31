@@ -62,6 +62,9 @@ export default function PenjualanTabel({
         <TableHeader>
           <TableRow>
             <TableHead>No. Invoice</TableHead>
+            <TableHead>No. NPB</TableHead>
+            <TableHead>No. DO</TableHead>
+            <TableHead>Metode Pengambilan</TableHead>
             <TableHead>Tanggal</TableHead>
             <TableHead>Pelanggan</TableHead>
             <TableHead className="text-center">Total</TableHead>
@@ -77,6 +80,9 @@ export default function PenjualanTabel({
                 <TableCell className="font-medium">
                   {penjualan.noInvoice}
                 </TableCell>
+                <TableCell>{penjualan.noNPB}</TableCell>
+                <TableCell>{penjualan.noDO || "-"}</TableCell>
+                <TableCell>{penjualan.metodePengambilan}</TableCell>
                 <TableCell>{formatTanggal(penjualan.tanggal)}</TableCell>
                 <TableCell>{penjualan.namaPelanggan}</TableCell>
                 <TableCell className="text-center">

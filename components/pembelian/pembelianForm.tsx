@@ -141,7 +141,7 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
         noNPB,
         invoice,
         total,
-        status: "pending", // default status
+        status: "Pending", // default status
         items,
       });
 

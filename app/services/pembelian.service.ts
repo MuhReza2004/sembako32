@@ -20,7 +20,7 @@ export const createPembelian = async (data: {
   noNPB?: string;
   invoice?: string;
   total: number;
-  status: string;
+  status: "Pending" | "Completed";
   items: PembelianDetail[];
 }) => {
   const pembelianRef = await addDoc(collection(db, "pembelian"), {
@@ -45,11 +45,17 @@ export const createPembelian = async (data: {
       subtotal: item.subtotal,
     });
 
-    // Update stock
-    const supplierProdukRef = doc(db, "supplier_produk", item.supplierProdukId);
-    await updateDoc(supplierProdukRef, {
-      stok: increment(item.qty),
-    });
+    // Only update stock if status is not 'Pending'
+    if (data.status !== "Pending") {
+      const supplierProdukRef = doc(
+        db,
+        "supplier_produk",
+        item.supplierProdukId,
+      );
+      await updateDoc(supplierProdukRef, {
+        stok: increment(item.qty),
+      });
+    }
   }
 
   return pembelianRef.id;
@@ -126,6 +132,39 @@ export const getAllPembelian = async (): Promise<Pembelian[]> => {
   return pembelianList;
 };
 
+export const updatePembelianAndStock = async (
+  pembelianId: string,
+  data: {
+    noDO?: string;
+    noNPB?: string;
+    invoice?: string;
+  },
+) => {
+  const pembelianRef = doc(db, "pembelian", pembelianId);
+
+  // First, update the purchase document
+  await updateDoc(pembelianRef, {
+    ...data,
+    status: "Completed",
+    updatedAt: new Date(),
+  });
+
+  // Then, fetch the purchase details to update stock
+  const detailQuery = query(
+    collection(db, "pembelian_detail"),
+    where("pembelianId", "==", pembelianId),
+  );
+  const detailSnap = await getDocs(detailQuery);
+
+  for (const detailDoc of detailSnap.docs) {
+    const detail = detailDoc.data();
+    const supplierProdukRef = doc(db, "supplier_produk", detail.supplierProdukId);
+    await updateDoc(supplierProdukRef, {
+      stok: increment(detail.qty),
+    });
+  }
+};
+
 export const getPembelianDetails = async (
   pembelianId: string,
 ): Promise<PembelianDetail[]> => {
@@ -141,13 +180,3 @@ export const getPembelianDetails = async (
   })) as PembelianDetail[];
 };
 
-export const updatePembelianStatus = async (
-  pembelianId: string,
-  status: string,
-) => {
-  const pembelianRef = doc(db, "pembelian", pembelianId);
-  await updateDoc(pembelianRef, {
-    status: status,
-    updatedAt: new Date(),
-  });
-};

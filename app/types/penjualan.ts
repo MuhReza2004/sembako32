@@ -25,7 +25,9 @@ export interface Penjualan {
   pelangganId: string;
   catatan?: string;
   noInvoice: string;
-  noSuratJalan: string;
+  noNPB: string; // Nomor Pengambilan Barang
+  noDO?: string; // Nomor Delivery Order
+  metodePengambilan: "Ambil Langsung" | "Diantar";
   total: number;
   totalDibayar?: number; // Total amount paid
   status: "Lunas" | "Belum Lunas" | "Batal";

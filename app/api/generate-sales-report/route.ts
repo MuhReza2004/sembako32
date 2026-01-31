@@ -412,7 +412,9 @@ export async function POST(request: NextRequest) {
                   <tr>
                     <th class="text-center">No</th>
                     <th>Invoice</th>
-                    <th>Surat Jalan</th>
+                    <th>No. NPB</th>
+                    <th>No. DO</th>
+                    <th>Metode Pengambilan</th>
                     <th>Tanggal</th>
                     <th>Pelanggan</th>
                     <th>Alamat</th>
@@ -428,7 +430,9 @@ export async function POST(request: NextRequest) {
                     <tr>
                       <td class="text-center">${index + 1}</td>
                       <td style="font-weight: 600; color: #147146;">${sale.noInvoice}</td>
-                      <td>${sale.noSuratJalan}</td>
+                      <td>${sale.noNPB}</td>
+                      <td>${sale.noDO || "-"}</td>
+                      <td>${sale.metodePengambilan}</td>
                       <td>${new Date(sale.tanggal).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</td>
                       <td><strong>${sale.namaPelanggan || "Pelanggan Tidak Diketahui"}</strong></td>
                       <td style="font-size: 8px; color: #6b7280;">${sale.alamatPelanggan || "-"}</td>
@@ -552,19 +556,15 @@ export async function POST(request: NextRequest) {
     `;
 
     // Launch Puppeteer and generate PDF
-    console.log("Launching Puppeteer...");
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
-    console.log("Creating new page...");
     const page = await browser.newPage();
 
-    console.log("Setting content...");
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
-    console.log("Generating PDF...");
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -579,9 +579,7 @@ export async function POST(request: NextRequest) {
       footerTemplate: footerTemplate,
     });
 
-    console.log("Closing browser...");
     await browser.close();
-    console.log("PDF generated successfully");
 
     // Return PDF as response
     const filename =

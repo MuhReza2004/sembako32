@@ -123,7 +123,9 @@ export default function PenjualanReportPage() {
       worksheet.columns = [
         { width: 5 }, // No
         { width: 18 }, // Invoice
-        { width: 18 }, // Surat Jalan
+        { width: 18 }, // NPB
+        { width: 18 }, // DO
+        { width: 20 }, // Metode Pengambilan
         { width: 15 }, // Tanggal
         { width: 25 }, // Pelanggan
         { width: 35 }, // Alamat
@@ -133,7 +135,7 @@ export default function PenjualanReportPage() {
       ];
 
       // Add title
-      worksheet.mergeCells("A1:I1");
+      worksheet.mergeCells("A1:K1");
       const titleCell = worksheet.getCell("A1");
       titleCell.value = "LAPORAN PENJUALAN";
       titleCell.font = { size: 18, bold: true, color: { argb: "FF1F2937" } };
@@ -146,7 +148,7 @@ export default function PenjualanReportPage() {
       worksheet.getRow(1).height = 30;
 
       // Add period info
-      worksheet.mergeCells("A2:I2");
+      worksheet.mergeCells("A2:K2");
       const periodText =
         startDate && endDate
           ? `Periode: ${new Date(startDate).toLocaleDateString("id-ID")} - ${new Date(endDate).toLocaleDateString("id-ID")}`
@@ -248,7 +250,9 @@ export default function PenjualanReportPage() {
       const headers = [
         "No",
         "Invoice",
-        "Surat Jalan",
+        "No. NPB",
+        "No. DO",
+        "Metode Pengambilan",
         "Tanggal",
         "Pelanggan",
         "Alamat",
@@ -292,7 +296,9 @@ export default function PenjualanReportPage() {
         const rowData = [
           index + 1,
           penjualan.noInvoice,
-          penjualan.noSuratJalan,
+          penjualan.noNPB,
+          penjualan.noDO || "-",
+          penjualan.metodePengambilan,
           new Date(penjualan.tanggal).toLocaleDateString("id-ID"),
           penjualan.namaPelanggan || "Pelanggan Tidak Diketahui",
           penjualan.alamatPelanggan || "-",
@@ -309,9 +315,9 @@ export default function PenjualanReportPage() {
 
         row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
           // Alignment
-          if (colNumber === 1 || colNumber === 8 || colNumber === 9) {
+          if (colNumber === 1 || colNumber === 10 || colNumber === 11) {
             cell.alignment = { horizontal: "center", vertical: "middle" };
-          } else if (colNumber === 7) {
+          } else if (colNumber === 9) {
             cell.alignment = {
               horizontal: "left",
               vertical: "top",
@@ -340,12 +346,12 @@ export default function PenjualanReportPage() {
           cell.font = { size: 10 };
 
           // Format currency
-          if (colNumber === 8) {
+          if (colNumber === 10) {
             cell.numFmt = '"Rp" #,##0';
           }
 
           // Status styling
-          if (colNumber === 9) {
+          if (colNumber === 11) {
             cell.font = { bold: true, size: 10 };
             if (cell.value === "Lunas") {
               cell.font = { ...cell.font, color: { argb: "FF16A34A" } };
@@ -360,7 +366,7 @@ export default function PenjualanReportPage() {
 
       // Add footer
       const lastRow = worksheet.rowCount + 2;
-      worksheet.mergeCells(`A${lastRow}:I${lastRow}`);
+      worksheet.mergeCells(`A${lastRow}:K${lastRow}`);
       const footerCell = worksheet.getCell(`A${lastRow}`);
       footerCell.value = `Dicetak pada: ${new Date().toLocaleString("id-ID")}`;
       footerCell.font = { size: 9, italic: true, color: { argb: "FF6B7280" } };
@@ -582,7 +588,9 @@ export default function PenjualanReportPage() {
                 <TableHeader>
                   <TableRow className="bg-gray-100">
                     <TableHead>Invoice</TableHead>
-                    <TableHead>Surat Jalan</TableHead>
+                    <TableHead>No. NPB</TableHead>
+                    <TableHead>No. DO</TableHead>
+                    <TableHead>Metode Pengambilan</TableHead>
                     <TableHead>Tanggal</TableHead>
                     <TableHead>Pelanggan</TableHead>
                     <TableHead>Produk Dibeli</TableHead>
@@ -598,7 +606,13 @@ export default function PenjualanReportPage() {
                         {penjualan.noInvoice}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {penjualan.noSuratJalan}
+                        {penjualan.noNPB}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {penjualan.noDO || "-"}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {penjualan.metodePengambilan}
                       </TableCell>
                       <TableCell>
                         {new Date(penjualan.tanggal).toLocaleDateString(

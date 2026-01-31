@@ -567,6 +567,20 @@ async function generatePdf(
           <span class="value">${penjualan.nomorInvoice || penjualan.noInvoice}</span>
         </div>
         <div class="invoice-item">
+          <span class="label">No. NPB</span>
+          <span class="value">${penjualan.noNPB}</span>
+        </div>
+        ${
+          penjualan.metodePengambilan === "Diantar" && penjualan.noDO
+            ? `
+        <div class="invoice-item">
+          <span class="label">No. DO</span>
+          <span class="value">${penjualan.noDO}</span>
+        </div>
+        `
+            : ""
+        }
+        <div class="invoice-item">
           <span class="label">Tanggal</span>
           <span class="value">${new Date(penjualan.tanggal).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}</span>
         </div>
@@ -615,6 +629,10 @@ async function generatePdf(
           <div class="customer-item">
             <span class="label">Status</span>
             <span class="value">${penjualan.status}</span>
+          </div>
+          <div class="customer-item">
+            <span class="label">Pengiriman</span>
+            <span class="value">${penjualan.metodePengambilan}</span>
           </div>
         </div>
 
@@ -829,16 +847,14 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error generating PDF:", error);
-    console.error(
-      "Error stack:",
-      error instanceof Error ? error.stack : "No stack trace",
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
       {
         error: "Failed to generate PDF",
-        details: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : "No stack trace",
+        details: errorMessage,
+        stack: errorStack,
       },
       { status: 500 },
     );

@@ -14,19 +14,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Package,
   Calendar,
   FileText,
   Truck,
   TrendingUp,
   Eye,
+  Edit,
 } from "lucide-react";
 import { useMemo, useEffect, useState } from "react";
 import { getAllSuppliers } from "@/app/services/supplyer.service";
@@ -35,7 +29,8 @@ import { getAllSupplierProduk } from "@/app/services/supplierProduk.service";
 import { Supplier, SupplierProduk } from "@/app/types/suplyer";
 import { Produk } from "@/app/types/produk";
 import DialogDetailPembelian from "./DialogDetailPembelian";
-import { updatePembelianStatus } from "@/app/services/pembelian.service";
+import DialogEditPembelian from "./DialogEditPembelian";
+import { getAllPembelian } from "@/app/services/pembelian.service";
 
 export default function PembelianTable({ data }: { data: Pembelian[] }) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -45,27 +40,16 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
     null,
   );
   const [detailOpen, setDetailOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [localData, setLocalData] = useState<Pembelian[]>(data);
 
   useEffect(() => {
     setLocalData(data);
   }, [data]);
 
-  const handleStatusChange = async (id: string, status: string) => {
-    // Optimistic UI update
-    setLocalData((prevData) =>
-      prevData.map((p) => (p.id === id ? { ...p, status } : p)),
-    );
-
-    try {
-      await updatePembelianStatus(id, status);
-      // Optionally, you can add a success notification here
-    } catch (error) {
-      // Revert the change if the update fails
-      setLocalData(data);
-      // Optionally, you can add an error notification here
-      console.error("Failed to update status:", error);
-    }
+  const refreshData = async () => {
+    const freshData = await getAllPembelian();
+    setLocalData(freshData);
   };
 
   useEffect(() => {
@@ -113,7 +97,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
     );
 
     return Object.values(grouped).sort((a, b) => b.nama.localeCompare(a.nama));
-  }, [data]);
+  }, [localData]);
 
   // Hitung grand total
   const grandTotal = useMemo(() => {
@@ -183,7 +167,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
             {localData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={10}
+                  colSpan={11}
                   className="text-center py-12 text-gray-500"
                 >
                   <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -317,11 +301,9 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
                   <TableCell className="text-center">
                     <Badge
                       className={`${
-                        p.status === "completed"
+                        p.status === "Completed"
                           ? "bg-green-100 text-green-800"
-                          : p.status === "processing"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
                       {p.status}
@@ -339,23 +321,17 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Select
-                        name="status"
-                        defaultValue={p.status}
-                        value={p.status}
-                        onValueChange={(newStatus) =>
-                          handleStatusChange(p.id!, newStatus)
-                        }
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={p.status === "Completed"}
+                        onClick={() => {
+                          setSelectedPembelian(p);
+                          setEditOpen(true);
+                        }}
                       >
-                        <SelectTrigger className="w-[120px] h-9">
-                          <SelectValue placeholder="Ubah Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="processing">Processing</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <Edit className="w-4 h-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -366,7 +342,7 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
             <TableFooter>
               <TableRow className=" bg-green-600">
                 <TableCell
-                  colSpan={9}
+                  colSpan={10}
                   className="text-white font-bold text-base"
                 >
                   <div className="flex items-center gap-2">
@@ -428,6 +404,13 @@ export default function PembelianTable({ data }: { data: Pembelian[] }) {
         onOpenChange={setDetailOpen}
         pembelian={selectedPembelian}
       />
+      <DialogEditPembelian
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        pembelian={selectedPembelian}
+        onSuccess={refreshData}
+      />
     </div>
   );
 }
+
