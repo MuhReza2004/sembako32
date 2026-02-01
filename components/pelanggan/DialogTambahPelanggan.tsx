@@ -40,9 +40,9 @@ export const DialogTambahPelanggan: React.FC<DialogTambahPelangganProps> = ({
       namaPelanggan: "",
       kodePelanggan: "",
       namaToko: "",
-      nib: "",
+      nib: "-",
       alamat: "",
-      noTelp: "",
+      noTelp: "-",
       email: "",
       status: "aktif",
     },
@@ -146,7 +146,7 @@ export const DialogTambahPelanggan: React.FC<DialogTambahPelangganProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="nib" className="font-semibold">
-                NIB(Nomor Induk Berusaha) *
+                NIB(Nomor Induk Berusaha)
               </Label>
               <Input
                 id="nib"
@@ -173,7 +173,6 @@ export const DialogTambahPelanggan: React.FC<DialogTambahPelangganProps> = ({
                 placeholder="Misal: 081234567890"
                 {...register("noTelp", {
                   required: "Nomor telepon wajib diisi",
-                  minLength: { value: 10, message: "Minimal 10 angka" },
                 })}
                 className={errors.noTelp ? "border-red-500" : ""}
               />

@@ -17,7 +17,7 @@ export interface Pembelian {
   noNPB?: string;
   invoice?: string;
   total: number;
-  status: "Pending" | "Completed";
+  status: "Pending" | "Completed" | "Decline";
   createdAt?: Date | any;
   updatedAt?: Date | any;
   items?: PembelianDetail[]; // populated from pembelian_detail

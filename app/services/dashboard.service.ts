@@ -116,7 +116,7 @@ const getTotalSales = async (dateRange?: {
   endDate: Date;
 }): Promise<number> => {
   let q = query(collection(db, "penjualan"));
-  if (dateRange) {
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
     q = query(
       q,
       where("createdAt", ">=", dateRange.startDate),
@@ -132,7 +132,7 @@ const getTotalPurchases = async (dateRange?: {
   endDate: Date;
 }): Promise<number> => {
   let q = query(collection(db, "pembelian"));
-  if (dateRange) {
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
     q = query(
       q,
       where("createdAt", ">=", dateRange.startDate),
@@ -148,7 +148,7 @@ const getTotalRevenue = async (dateRange?: {
   endDate: Date;
 }): Promise<number> => {
   let q = query(collection(db, "penjualan"));
-  if (dateRange) {
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
     q = query(
       q,
       where("createdAt", ">=", dateRange.startDate),
@@ -173,7 +173,7 @@ const getTotalExpenses = async (dateRange?: {
   endDate: Date;
 }): Promise<number> => {
   let q = query(collection(db, "pembelian"));
-  if (dateRange) {
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
     q = query(
       q,
       where("createdAt", ">=", dateRange.startDate),
@@ -185,7 +185,9 @@ const getTotalExpenses = async (dateRange?: {
   let total = 0;
   snap.forEach((doc) => {
     const data = doc.data() as Pembelian;
-    total += data.total || 0;
+    if (data.status !== "Decline") {
+      total += data.total || 0;
+    }
   });
 
   return total;
@@ -238,7 +240,7 @@ const getRecentSales = async (dateRange?: {
   endDate: Date;
 }): Promise<RecentTransaction[]> => {
   let q;
-  if (dateRange) {
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
     q = query(
       collection(db, "penjualan"),
       where("createdAt", ">=", dateRange.startDate),
@@ -290,7 +292,7 @@ const getRecentPurchases = async (dateRange?: {
   endDate: Date;
 }): Promise<RecentTransaction[]> => {
   let q;
-  if (dateRange) {
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
     q = query(
       collection(db, "pembelian"),
       where("createdAt", ">=", dateRange.startDate),

@@ -2,7 +2,7 @@ export interface PelangganFormData {
   namaPelanggan: string;
   kodePelanggan: string;
   namaToko: string;
-  nib: string;
+  nib?: string;
   alamat: string;
   noTelp: string;
   email?: string;

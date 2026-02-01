@@ -135,7 +135,7 @@ function TambahPenjualanForm() {
         namaPelanggan: "",
         namaToko: "",
         alamat: "",
-        noTelp: "",
+        noTelp: "-",
       });
     } catch (e: any) {
       setError("Gagal menambah pelanggan baru: " + e.message);

@@ -20,7 +20,7 @@ export const createPembelian = async (data: {
   noNPB?: string;
   invoice?: string;
   total: number;
-  status: "Pending" | "Completed";
+  status: "Pending" | "Completed" | "Decline";
   items: PembelianDetail[];
 }) => {
   const pembelianRef = await addDoc(collection(db, "pembelian"), {
@@ -163,6 +163,17 @@ export const updatePembelianAndStock = async (
       stok: increment(detail.qty),
     });
   }
+};
+
+export const updatePembelianStatus = async (
+  pembelianId: string,
+  status: "Pending" | "Completed" | "Decline",
+) => {
+  const pembelianRef = doc(db, "pembelian", pembelianId);
+  await updateDoc(pembelianRef, {
+    status: status,
+    updatedAt: new Date(),
+  });
 };
 
 export const getPembelianDetails = async (

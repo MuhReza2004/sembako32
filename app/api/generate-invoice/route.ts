@@ -541,7 +541,7 @@ async function generatePdf(
             <div class="logo-container">
               <img src="${baseUrl}/logo.svg" alt="Logo" onerror="this.style.display='none'" />
             </div>
-            <h2>PT. Sumber Alam Pasangkayu</h2>
+            <h2>SEMBAKO 32</h2>
           </div>
           <div class="company-details">
             <div class="company-item">

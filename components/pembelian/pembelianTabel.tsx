@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Eye,
   Edit,
+  X,
 } from "lucide-react";
 import { useMemo, useEffect, useState } from "react";
 import { getAllSuppliers } from "@/app/services/supplyer.service";
@@ -230,10 +231,12 @@ export default function PembelianTable({
                   key={p.id}
                   className={`hover:bg-blue-50/50 transition-colors ${
                     p.status === "Pending"
-                      ? "bg-red-50"
-                      : idx % 2 === 0
-                        ? "bg-white"
-                        : "bg-gray-50/50"
+                      ? "bg-yellow-50"
+                      : p.status === "Decline"
+                        ? "bg-red-100"
+                        : idx % 2 === 0
+                          ? "bg-white"
+                          : "bg-gray-50/50"
                   }`}
                 >
                   <TableCell className="font-medium text-gray-900">
@@ -357,7 +360,9 @@ export default function PembelianTable({
                       className={`${
                         p.status === "Completed"
                           ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
+                          : p.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
                       }`}
                     >
                       {p.status}
@@ -378,7 +383,7 @@ export default function PembelianTable({
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={p.status === "Completed"}
+                        disabled={p.status !== "Pending"}
                         onClick={() => {
                           setSelectedPembelian(p);
                           setEditOpen(true);

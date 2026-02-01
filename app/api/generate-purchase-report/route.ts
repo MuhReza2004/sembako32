@@ -415,7 +415,7 @@ export async function POST(request: NextRequest) {
             </div>
 
             <div class="signature-section">
-                <div style="font-size: 10px; margin-bottom: 5px;">Mengetahui,<br>PT. Sumber Alam Pasangkayu</div>
+                <div style="font-size: 10px; margin-bottom: 5px;">Mengetahui,<br>SEMBAKO 32</div>
                 <div class="signature-line"></div>
                 <div class="signature-name">AM.BISNIS</div>
             </div>
@@ -461,11 +461,11 @@ export async function POST(request: NextRequest) {
           <div style="display: flex; align-items: center; gap: 20px;">
             <img src="${logoSrc}" style="height: 55px; width: 55px; background: white; border-radius: 8px; padding: 6px;" />
             <div>
-              <h1 style="font-size: 18px; color: white; margin: 0 0 10px 0; font-weight: 700; letter-spacing: 0.5px;">PT. Sumber Alam Pasangkayu</h1>
+              <h1 style="font-size: 18px; color: white; margin: 0 0 10px 0; font-weight: 700; letter-spacing: 0.5px;">Sembako32</h1>
               <div style="font-size: 9px; line-height: 1.7; color: white; opacity: 0.95;">
                 <div><strong style="display: inline-block; width: 45px;">Alamat</strong> : Jl. Soekarno Hatta Pasangkayu</div>
                 <div><strong style="display: inline-block; width: 45px;">Kontak</strong> : 0821-9030-9333</div>
-                <div><strong style="display: inline-block; width: 45px;">Email</strong> : sumberalampasangkayu@gmail.com</div>
+                <div><strong style="display: inline-block; width: 45px;">Email</strong> : sembako32@gmail.com</div>
               </div>
             </div>
           </div>

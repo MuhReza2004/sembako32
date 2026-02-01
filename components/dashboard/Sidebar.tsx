@@ -84,12 +84,12 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-white border-r flex flex-col">
       {/* Centered Logo Section */}
-      <div className="flex justify-center items-center py-8 border-b">
+      <div className="flex justify-center items-center py-5 border-b">
         <Image
           src="/logo.svg"
           alt="Logo"
-          width={130}
-          height={135}
+          width={200}
+          height={200}
           className="object-contain"
         />
       </div>

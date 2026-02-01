@@ -26,6 +26,9 @@ import { Trash2, Plus, Package, Save } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
+import { DialogKonfirmasiPembelian } from "./DialogKonfirmasiPembelian";
+import { Pembelian } from "@/app/types/pembelian";
+
 interface PembelianFormProps {
   onSuccess?: () => void;
 }
@@ -47,6 +50,10 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
   const [items, setItems] = useState<PembelianDetail[]>([]);
   const [isTambahProdukOpen, setIsTambahProdukOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pembelianToConfirm, setPembelianToConfirm] = useState<
+    (Omit<Pembelian, "id" | "status"> & { items: PembelianDetail[] }) | null
+  >(null);
 
   useEffect(() => {
     const qSupplierProduk = query(
@@ -122,7 +129,7 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
 
   const total = items.reduce((sum, i) => sum + i.subtotal, 0);
 
-  const submit = async () => {
+  const handleOpenConfirmDialog = () => {
     if (!supplierId) {
       alert("Pilih supplier terlebih dahulu");
       return;
@@ -132,20 +139,30 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
       return;
     }
 
+    const pembelianData = {
+      supplierId,
+      tanggal,
+      noDO,
+      noNPB,
+      invoice,
+      total,
+      status: "Pending", // default status
+      items,
+    };
+    setPembelianToConfirm(pembelianData);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    if (!pembelianToConfirm) return;
+
     setIsLoading(true);
     try {
-      await createPembelian({
-        supplierId,
-        tanggal,
-        noDO,
-        noNPB,
-        invoice,
-        total,
-        status: "Pending", // default status
-        items,
-      });
+      await createPembelian(pembelianToConfirm);
 
       alert("Pembelian berhasil!");
+      setIsConfirmDialogOpen(false);
+      setPembelianToConfirm(null);
       setItems([]);
       setNoDO("");
       setNoNPB("");
@@ -448,7 +465,7 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
               </div>
             </div>
             <Button
-              onClick={submit}
+              onClick={handleOpenConfirmDialog}
               size="lg"
               disabled={isLoading || items.length === 0 || !supplierId}
               className="w-full sm:w-auto min-w-[200px]"
@@ -470,6 +487,17 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
         open={isTambahProdukOpen}
         onOpenChange={setIsTambahProdukOpen}
         onSubmit={handleTambahProdukSubmit}
+        isLoading={isLoading}
+      />
+
+      <DialogKonfirmasiPembelian
+        open={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        pembelianData={pembelianToConfirm}
+        supplier={supplierList.find((s) => s.id === supplierId) || null}
+        produkList={produkList}
+        supplierProdukList={supplierProdukList}
+        onConfirm={handleConfirmSubmit}
         isLoading={isLoading}
       />
     </>
