@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
             .report-title {
               text-align: center;
               padding: 25px 0 20px;
-              border-bottom: 3px solid #147146;
+              border-bottom: 3px solid #102853;
               margin-bottom: 25px;
             }
 
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
 
             .report-title .period {
               display: inline-block;
-              background: #147146;
+              background: #102853;
               color: white;
               padding: 6px 16px;
               border-radius: 20px;
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
             }
 
             thead tr {
-              background: #147146;
+              background: #102853;
               color: white;
             }
 
@@ -273,8 +273,8 @@ export async function POST(request: NextRequest) {
             }
             
             .status-lunas {
-              background-color: #d1fae5;
-              color: #065f46;
+              background-color: #fff9e6;
+              color: #102853;
               padding: 3px 8px;
               border-radius: 4px;
               font-size: 8px;
@@ -341,7 +341,7 @@ export async function POST(request: NextRequest) {
                 color: #1f2937;
             }
             .grand-total {
-                background-color: #147146;
+                background-color: #102853;
                 color: white;
             }
             .grand-total .total-item-label, .grand-total .total-item-value {
@@ -429,7 +429,7 @@ export async function POST(request: NextRequest) {
                       (sale, index) => `
                     <tr>
                       <td class="text-center">${index + 1}</td>
-                      <td style="font-weight: 600; color: #147146;">${sale.noInvoice}</td>
+                      <td style="font-weight: 600; color: #102853;">${sale.noInvoice}</td>
                       <td>${sale.noNPB}</td>
                       <td>${sale.noDO || "-"}</td>
                       <td>${sale.metodePengambilan}</td>
@@ -448,7 +448,7 @@ export async function POST(request: NextRequest) {
                             : "<small style='color: #9ca3af;'>Tidak ada item</small>"
                         }
                       </td>
-                      <td class="text-right"><strong style="color: #147146; font-size: 10px;">${formatRupiah(sale.total)}</strong></td>
+                      <td class="text-right"><strong style="color: #102853; font-size: 10px;">${formatRupiah(sale.total)}</strong></td>
                       <td class="text-center">
                         <span class="${sale.status === "Lunas" ? "status-lunas" : "status-belum-lunas"}">
                           ${sale.status}
@@ -493,8 +493,8 @@ export async function POST(request: NextRequest) {
       <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
         <defs>
           <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#10B981;" />
-            <stop offset="100%" style="stop-color:#0D9488;" />
+            <stop offset="0%" style="stop-color:#fec335;" />
+            <stop offset="100%" style="stop-color:#ffd966;" />
           </linearGradient>
         </defs>
         <rect width="100%" height="100%" fill="url(#grad)" />

@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { db } from "@/app/lib/firebase";
 
 interface DashboardData {
@@ -171,15 +172,14 @@ export default function AdminDashboardPage() {
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
-          <button
+          <Button
             onClick={() => {
               setIsLoading(true);
               updateDashboardData();
             }}
-            className="px-4 py-2 bg-[#099696] text-white rounded hover:bg-[#ff6a00]"
           >
             Refresh Data
-          </button>
+          </Button>
         </div>
       </div>
 

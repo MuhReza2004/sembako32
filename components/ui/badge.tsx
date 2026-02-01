@@ -18,8 +18,8 @@ const badgeVariants = cva(
           "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
-        primary: "bg-[#102853] text-white hover:bg-[#fec335] hover:text-white",
-        remove: "bg-[#fec335]  hover:bg-[#102853] hover:text-white", // " text-white hover:bg-[] hover:text-white",
+        primary: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+        remove: "bg-destructive text-destructive-foreground [a&]:hover:bg-destructive/90",
       },
     },
     defaultVariants: {

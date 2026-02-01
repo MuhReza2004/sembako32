@@ -408,9 +408,9 @@ function TambahPenjualanForm() {
   const selectedPelanggan = pelangganList.find((p) => p.id === pelangganId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-primary-foreground/10">
       {/* Header Section with Gradient Background */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-xl">
+      <div className="bg-gradient-to-r from-primary via-yellow-400 to-yellow-500 text-primary-foreground shadow-xl">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Button
             variant="ghost"
@@ -432,7 +432,7 @@ function TambahPenjualanForm() {
               <h1 className="text-4xl font-bold mb-2 tracking-tight">
                 {editingPenjualan ? "Edit" : "Buat"} Transaksi Penjualan
               </h1>
-              <p className="text-emerald-50 text-lg flex items-center gap-2">
+              <p className="text-yellow-100 text-lg flex items-center gap-2">
                 <Receipt className="h-4 w-4" />
                 Kelola transaksi penjualan dengan detail lengkap
               </p>
@@ -467,8 +467,8 @@ function TambahPenjualanForm() {
             {/* Left Column - Main Form */}
             <div className="lg:col-span-2 space-y-6">
               {/* Products Section */}
-              <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+              <Card className="overflow-hidden border-none shadow-lg bg-background/80 backdrop-blur-sm">
+                <div className="bg-gradient-to-r from-primary to-yellow-500 p-6 text-primary-foreground">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
@@ -476,7 +476,7 @@ function TambahPenjualanForm() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold">Input Produk</h3>
-                        <p className="text-sm text-emerald-100">
+                        <p className="text-sm text-yellow-100">
                           Pilih produk dan jumlah, lalu klik tambah
                         </p>
                       </div>
@@ -486,7 +486,7 @@ function TambahPenjualanForm() {
                 {/* Pelanggan */}
                 <div className="group px-8">
                   <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                    <UserCircle className="h-4 w-4 text-blue-600" />
+                    <UserCircle className="h-4 w-4 text-primary-foreground" />
                     Pelanggan
                     <span className="text-red-500">*</span>
                   </Label>
@@ -502,7 +502,7 @@ function TambahPenjualanForm() {
                     }}
                     value={pelangganId}
                   >
-                    <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
+                    <SelectTrigger className="h-12 border-2 group-hover:border-primary-foreground/50 transition-colors">
                       <SelectValue placeholder="Pilih Pelanggan" />
                     </SelectTrigger>
                     <SelectContent>
@@ -518,7 +518,7 @@ function TambahPenjualanForm() {
                           value={p.id || ""}
                         >
                           <div className="flex items-center gap-2">
-                            <UserCircle className="h-4 w-4 text-blue-500" />
+                            <UserCircle className="h-4 w-4 text-primary-foreground" />
                             <div>
                               <div className="font-semibold">
                                 {p.namaPelanggan}
@@ -597,11 +597,11 @@ function TambahPenjualanForm() {
                 )}
                 <div className="p-6 space-y-6">
                   {/* Current Item Input */}
-                  <Card className="p-4 border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+                  <Card className="p-4 border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-yellow-50">
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 mb-4">
-                        <Package className="h-5 w-5 text-emerald-600" />
-                        <h4 className="font-semibold text-slate-800">
+                        <Package className="h-5 w-5 text-primary" />
+                        <h4 className="font-semibold text-foreground">
                           Tambah Produk Baru
                         </h4>
                       </div>
@@ -649,7 +649,7 @@ function TambahPenjualanForm() {
                       {/* Add Button */}
                       <Button
                         onClick={addItemToList}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Tambah ke Daftar
@@ -660,7 +660,7 @@ function TambahPenjualanForm() {
                   {/* Items Table */}
                   {items.length > 0 && (
                     <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
-                      <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-4 text-white">
+                      <div className="bg-gradient-to-r from-muted-foreground to-foreground p-4 text-primary-foreground">
                         <div className="flex items-center gap-2">
                           <Package className="h-5 w-5" />
                           <h4 className="font-semibold">
@@ -724,14 +724,14 @@ function TambahPenjualanForm() {
                   )}
 
                   {items.length === 0 && (
-                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-16 text-center bg-gradient-to-br from-slate-50 to-slate-100">
-                      <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Package className="h-10 w-10 text-slate-400" />
+                    <div className="border-2 border-dashed border-border rounded-xl p-16 text-center bg-gradient-to-br from-muted to-background">
+                      <div className="w-20 h-20 bg-muted-foreground/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Package className="h-10 w-10 text-muted-foreground" />
                       </div>
-                      <p className="text-slate-600 font-semibold text-lg mb-2">
+                      <p className="text-foreground font-semibold text-lg mb-2">
                         Belum Ada Produk
                       </p>
-                      <p className="text-sm text-slate-500 mb-4">
+                      <p className="text-sm text-muted-foreground mb-4">
                         Pilih produk di atas dan klik "Tambah ke Daftar"
                       </p>
                     </div>
@@ -739,8 +739,8 @@ function TambahPenjualanForm() {
                 </div>
               </Card>
 
-              <Card className="overflow-hidden border-none shadow-lg bg-white/80 backdrop-blur-sm">
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+              <Card className="overflow-hidden border-none shadow-lg bg-background/80 backdrop-blur-sm">
+                <div className="bg-gradient-to-r from-primary to-yellow-500 p-6 text-primary-foreground">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
                       <User className="h-5 w-5" />
@@ -749,7 +749,7 @@ function TambahPenjualanForm() {
                       <h3 className="text-lg font-semibold">
                         Detail Pelanggan & Transaksi
                       </h3>
-                      <p className="text-sm text-blue-100">
+                      <p className="text-sm text-yellow-100">
                         Informasi pelanggan dan metode pembayaran
                       </p>
                     </div>
@@ -874,14 +874,14 @@ function TambahPenjualanForm() {
                     {/* Metode Pengambilan */}
                     <div className="group">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <Truck className="h-4 w-4 text-purple-600" />
+                        <Truck className="h-4 w-4 text-primary-foreground" />
                         Metode Pengambilan
                       </Label>
                       <Select
                         onValueChange={(v: any) => setMetodePengambilan(v)}
                         value={metodePengambilan}
                       >
-                        <SelectTrigger className="h-12 border-2 group-hover:border-purple-300 transition-colors">
+                        <SelectTrigger className="h-12 border-2 group-hover:border-primary-foreground/50 transition-colors">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -895,20 +895,20 @@ function TambahPenjualanForm() {
                     {/* Status Pembayaran */}
                     <div className="group">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
                         Status Pembayaran
                       </Label>
                       <Select
                         onValueChange={(v: any) => setStatus(v)}
                         value={status}
                       >
-                        <SelectTrigger className="h-12 border-2 group-hover:border-emerald-300 transition-colors">
+                        <SelectTrigger className="h-12 border-2 group-hover:border-primary/50 transition-colors">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Lunas">
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                              <CheckCircle2 className="h-4 w-4 text-primary" />
                               <span className="font-medium">Lunas</span>
                             </div>
                           </SelectItem>
@@ -925,26 +925,26 @@ function TambahPenjualanForm() {
                     {/* Metode Pembayaran */}
                     <div className="group">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        <CreditCard className="h-4 w-4 text-purple-600" />
+                        <CreditCard className="h-4 w-4 text-primary-foreground" />
                         Metode Pembayaran
                       </Label>
                       <Select
                         onValueChange={setMetodePembayaran}
                         value={metodePembayaran}
                       >
-                        <SelectTrigger className="h-12 border-2 group-hover:border-purple-300 transition-colors">
+                        <SelectTrigger className="h-12 border-2 group-hover:border-primary-foreground/50 transition-colors">
                           <SelectValue placeholder="Pilih Metode" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Tunai">
                             <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                              <div className="w-2 h-2 bg-primary rounded-full"></div>
                               Tunai
                             </div>
                           </SelectItem>
                           <SelectItem value="Transfer">
                             <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <div className="w-2 h-2 bg-primary-foreground rounded-full"></div>
                               Transfer Bank
                             </div>
                           </SelectItem>
@@ -956,10 +956,10 @@ function TambahPenjualanForm() {
                   {/* Bank Details - Collapsible */}
                   {metodePembayaran === "Transfer" && (
                     <div className="animate-in slide-in-from-top duration-300">
-                      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                      <Card className="bg-gradient-to-br from-primary-foreground/10 to-primary-foreground/20 border-primary-foreground/30">
                         <div className="p-4">
                           <div className="flex items-center gap-2 mb-4">
-                            <Building2 className="h-5 w-5 text-blue-600" />
+                            <Building2 className="h-5 w-5 text-primary-foreground" />
                             <h4 className="font-semibold text-slate-800">
                               Informasi Rekening Bank
                             </h4>
@@ -973,7 +973,7 @@ function TambahPenjualanForm() {
                                 value={namaBank}
                                 onChange={(e) => setNamaBank(e.target.value)}
                                 placeholder="Contoh: BNI"
-                                className="h-10 bg-white border-blue-200"
+                                className="h-10 bg-white border-primary-foreground/30"
                               />
                             </div>
                             <div>
@@ -986,7 +986,7 @@ function TambahPenjualanForm() {
                                   setNamaPemilikRekening(e.target.value)
                                 }
                                 placeholder="Nama pemilik rekening"
-                                className="h-10 bg-white border-blue-200"
+                                className="h-10 bg-white border-primary-foreground/30"
                               />
                             </div>
                             <div>
@@ -999,7 +999,7 @@ function TambahPenjualanForm() {
                                   setNomorRekening(e.target.value)
                                 }
                                 placeholder="Nomor rekening"
-                                className="h-10 bg-white border-blue-200 font-mono"
+                                className="h-10 bg-white border-primary-foreground/30 font-mono"
                               />
                             </div>
                           </div>
@@ -1056,13 +1056,13 @@ function TambahPenjualanForm() {
               {/* Customer Info Card */}
               {selectedPelanggan && (
                 <Card className="overflow-hidden border-none shadow-lg  top-6">
-                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+                  <div className="bg-gradient-to-r from-primary to-yellow-500 p-6 text-white">
                     <div className="flex items-center gap-2">
                       <UserCircle className="h-5 w-5" />
                       <h4 className="font-semibold">Info Pelanggan</h4>
                     </div>
                   </div>
-                  <div className="p-4 space-y-3 bg-gradient-to-br from-white to-indigo-50">
+                  <div className="p-4 space-y-3 bg-gradient-to-br from-background to-primary-foreground/10">
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Nama</div>
                       <div className="font-semibold text-slate-800">
@@ -1095,14 +1095,14 @@ function TambahPenjualanForm() {
 
               {/* Calculation Summary */}
               <Card className="overflow-hidden border-none shadow-lg  top-6">
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white">
+                <div className="bg-gradient-to-r from-primary to-yellow-500 p-4 text-primary-foreground">
                   <div className="flex items-center gap-2">
                     <Calculator className="h-5 w-5" />
                     <h4 className="font-semibold">Ringkasan Pembayaran</h4>
                   </div>
                 </div>
 
-                <div className="p-5 space-y-4 bg-gradient-to-br from-white to-slate-50">
+                <div className="p-5 space-y-4 bg-gradient-to-br from-background to-muted">
                   {/* Subtotal */}
                   <div className="flex justify-between items-center pb-3 border-b border-slate-200">
                     <span className="text-sm text-slate-600">Subtotal</span>
@@ -1147,10 +1147,10 @@ function TambahPenjualanForm() {
                   <Separator />
 
                   {/* Tax Toggle */}
-                  <div className="space-y-3 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                  <div className="space-y-3 p-3 bg-gradient-to-br from-primary-foreground/10 to-primary-foreground/20 rounded-lg border border-primary-foreground/20">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                      <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary-foreground" />
                         Pajak 11%
                       </Label>
                       <Switch
@@ -1159,9 +1159,9 @@ function TambahPenjualanForm() {
                       />
                     </div>
                     {pajakEnabled && (
-                      <div className="flex justify-between text-sm pt-2 border-t border-blue-200">
-                        <span className="text-blue-700">Nilai Pajak</span>
-                        <span className="font-semibold text-blue-800">
+                      <div className="flex justify-between text-sm pt-2 border-t border-primary-foreground/30">
+                        <span className="text-primary-foreground">Nilai Pajak</span>
+                        <span className="font-semibold text-primary-foreground/90">
                           + {formatRupiah(totalPajak)}
                         </span>
                       </div>
@@ -1171,9 +1171,9 @@ function TambahPenjualanForm() {
                   <Separator className="my-4" />
 
                   {/* Total */}
-                  <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-5 rounded-xl text-white shadow-lg">
+                  <div className="bg-gradient-to-br from-primary to-yellow-500 p-5 rounded-xl text-primary-foreground shadow-lg">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-emerald-100 text-sm font-medium">
+                      <span className="text-yellow-100 text-sm font-medium">
                         Total Pembayaran
                       </span>
                     </div>
@@ -1181,7 +1181,7 @@ function TambahPenjualanForm() {
                       {formatRupiah(total)}
                     </div>
                     {items.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-emerald-400/30 text-emerald-100 text-xs">
+                      <div className="mt-3 pt-3 border-t border-yellow-400/30 text-yellow-100 text-xs">
                         {items.length} item ·{" "}
                         {items.reduce((sum, item) => sum + item.qty, 0)} unit
                         total
@@ -1190,11 +1190,11 @@ function TambahPenjualanForm() {
                   </div>
 
                   {/* Status Badge */}
-                  <div className="flex items-center justify-center gap-2 p-3 bg-slate-100 rounded-lg">
+                  <div className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg">
                     {status === "Lunas" ? (
                       <>
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                        <span className="text-sm font-semibold text-emerald-700">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-semibold text-primary">
                           Pembayaran Lunas
                         </span>
                       </>
@@ -1215,7 +1215,7 @@ function TambahPenjualanForm() {
                 <Button
                   onClick={() => setShowPreview(true)}
                   disabled={isLoading || !pelangganId || items.length === 0}
-                  className="w-full h-12 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                  className="w-full h-12 bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-400 text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
                   {isLoading ? (
                     <>

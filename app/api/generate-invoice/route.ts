@@ -155,7 +155,7 @@ async function generatePdf(
         align-items: flex-start;
         margin-bottom: 25px;
         padding-bottom: 20px;
-        border-bottom: 3px solid #2c5282;
+        border-bottom: 3px solid #102853;
       }
 
       .company-section {
@@ -207,7 +207,7 @@ async function generatePdf(
       .company-header h2 {
         font-size: 15px;
         font-weight: bold;
-        color: #2c5282;
+        color: #102853;
         margin-bottom: 4px;
         text-transform: uppercase;
       }
@@ -258,16 +258,16 @@ async function generatePdf(
         font-size: 32px;
         font-weight: bold;
         text-align: right;
-        color: #2c5282;
+        color: #102853;
         margin-bottom: 12px;
         letter-spacing: 3px;
       }
 
       .invoice-meta {
-        background: #f8f9fa;
+        background: #fff9e6;
         padding: 12px;
         border-radius: 5px;
-        border-left: 4px solid #2c5282;
+        border-left: 4px solid #102853;
       }
 
       .invoice-meta p {
@@ -277,7 +277,7 @@ async function generatePdf(
       }
 
       .invoice-meta strong {
-        color: #2c5282;
+        color: #102853;
         font-weight: 600;
       }
 
@@ -291,7 +291,7 @@ async function generatePdf(
 
       .customer-section {
         flex: 1;
-        background: #f8f9fa;
+        background: #fff9e6;
         padding: 15px;
         border-radius: 5px;
       }
@@ -304,7 +304,7 @@ async function generatePdf(
 
       .customer-section p:first-child {
         font-weight: bold;
-        color: #2c5282;
+        color: #102853;
         margin-bottom: 8px;
         font-size: 11px;
       }
@@ -369,7 +369,7 @@ async function generatePdf(
       }
 
       thead {
-        background: #2c5282;
+        background: #102853;
         color: white;
       }
 
@@ -389,11 +389,11 @@ async function generatePdf(
       }
 
       tbody tr:hover {
-        background-color: #f8f9fa;
+        background-color: #fff9e6;
       }
 
       tbody tr:last-child td {
-        border-bottom: 2px solid #2c5282;
+        border-bottom: 2px solid #102853;
       }
 
       .text-center {
@@ -410,7 +410,7 @@ async function generatePdf(
         padding: 12px 15px;
         margin: 20px 0;
         border-radius: 5px;
-        border-left: 4px solid #ffc107;
+        border-left: 4px solid #fec335;
       }
 
       .terbilang-section p {
@@ -420,7 +420,7 @@ async function generatePdf(
       }
 
       .terbilang-section strong {
-        color: #f57c00;
+        color: #fec335;
         font-weight: 600;
       }
 
@@ -455,11 +455,11 @@ async function generatePdf(
       }
 
       .summary-table tr {
-        background: #f8f9fa;
+        background: #fff9e6;
       }
 
       .summary-table tr:last-child {
-        background: #2c5282;
+        background: #102853;
         color: white;
         font-weight: bold;
         font-size: 13px;
@@ -467,13 +467,13 @@ async function generatePdf(
 
       .summary-table tr:last-child td {
         padding: 12px;
-        border-top: 2px solid #1a365d;
+        border-top: 2px solid #102853;
       }
 
       /* Footer Section */
       .footer-notes {
         padding: 15px;
-        background: #f8f9fa;
+        background: #fff9e6;
         border-radius: 5px;
         width: 300px;
         flex-shrink: 0;
@@ -487,7 +487,7 @@ async function generatePdf(
       }
 
       .footer-notes strong {
-        color: #2c5282;
+        color: #102853;
       }
 
       /* Signature Section */

@@ -70,12 +70,14 @@ export default function Sidebar() {
   // Jika loading dan belum timeout, tampilkan loading state
   if (loading && !timeoutReached) {
     return (
-      <aside className="w-64 bg-gradient-to-b from-slate-50 to-white border-r border-slate-200">
+      <aside className="w-64 bg-gradient-to-b from-muted to-background border-r border-border">
         <div className="p-6">
-          <div className="h-8 bg-slate-200 rounded-md animate-pulse"></div>
+          <div className="h-8 bg-muted-foreground rounded-md animate-pulse"></div>
         </div>
         <nav className="space-y-2 px-3">
-          <div className="px-3 py-2 text-sm text-slate-500">Memuat menu...</div>
+          <div className="px-3 py-2 text-sm text-muted-foreground">
+            Memuat menu...
+          </div>
         </nav>
       </aside>
     );
@@ -129,60 +131,45 @@ export default function Sidebar() {
         }
 
         .sidebar-gradient {
-          background: linear-gradient(180deg, #ffffff 0%, #fefbf5 100%);
+          background: linear-gradient(
+            180deg,
+            hsl(var(--background)) 0%,
+            hsl(var(--muted)) 100%
+          );
         }
 
         .menu-shadow {
-          box-shadow: 0 2px 8px rgba(16, 40, 83, 0.1);
+          box-shadow: 0 2px 8px hsla(var(--primary-foreground) / 0.1);
         }
 
         .menu-active-shadow {
-          box-shadow: 0 4px 12px rgba(16, 40, 83, 0.15);
+          box-shadow: 0 4px 12px hsla(var(--primary-foreground) / 0.15);
         }
-
-        // .floating-logo {
-        //   animation: float 3s ease-in-out infinite;
-        // }
 
         .glow-pulse {
           animation: pulse-glow 2s ease-in-out infinite;
         }
       `}</style>
 
-      <aside className="w-64 sidebar-gradient border-r border-slate-200 flex flex-col">
-        {/* Logo Section with Matching Navbar Style */}
+      <aside className="w-64 sidebar-gradient border-r border-border flex flex-col">
         <div className="relative overflow-hidden border-b border-white/20">
-          {/* Background Gradient matching navbar */}
-          {/* <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(16, 40, 83, 0.98) 0%, rgba(254, 195, 53, 0.95) 100%)",
-            }}
-          /> */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 glow-pulse" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary-foreground/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 glow-pulse" />
 
-          {/* Decorative Blobs */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 glow-pulse" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-900/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 glow-pulse" />
-
-          {/* Pattern Overlay */}
           <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(254, 195, 53, 0.3) 0%, transparent 50%),
-                               radial-gradient(circle at 80% 80%, rgba(16, 40, 83, 0.3) 0%, transparent 50%)`,
+              backgroundImage: `radial-gradient(circle at 20% 50%, hsl(var(--primary) / 0.3) 0%, transparent 50%),
+                               radial-gradient(circle at 80% 80%, hsl(var(--primary-foreground) / 0.3) 0%, transparent 50%)`,
             }}
           />
 
-          {/* Content */}
           <div className="relative flex justify-center items-center py-3">
-            {/* Glow effect behind logo */}
             <div className="absolute inset-0 flex justify-center items-center">
-              <div className="w-48 h-48 bg-gradient-to-r from-yellow-400/30 to-blue-900/30 rounded-full blur-3xl glow-pulse" />
+              <div className="w-48 h-48 bg-gradient-to-r from-primary/30 to-primary-foreground/30 rounded-full blur-3xl glow-pulse" />
             </div>
 
-            {/* Logo Container with Glass Effect */}
-            <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl floating-logo hover:scale-105 transition-transform duration-300">
+            <div className="relative bg-background/10 backdrop-blur-md rounded-2xl p-6 border border-foreground/20 shadow-2xl floating-logo hover:scale-105 transition-transform duration-300">
               <Image
                 src="/logo.svg"
                 alt="Logo"
@@ -191,12 +178,11 @@ export default function Sidebar() {
                 className="object-contain relative z-10"
               />
 
-              {/* Shimmer Effect */}
               <div
                 className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
                   background:
-                    "linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)",
+                    "linear-gradient(90deg, transparent 0%, hsla(var(--foreground) / 0.3) 50%, transparent 100%)",
                   backgroundSize: "200% 100%",
                   animation: "shimmer 3s infinite",
                 }}
@@ -206,12 +192,11 @@ export default function Sidebar() {
         </div>
 
         {error && (
-          <div className="mx-3 mt-3 px-4 py-2.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="mx-3 mt-3 px-4 py-2.5 text-xs text-amber-800 bg-amber-50 border-amber-200 rounded-lg">
             {error}
           </div>
         )}
 
-        {/* Navigation Menu */}
         <nav className="flex-1 space-y-2 px-3 py-4 overflow-y-auto">
           {menusToShow.length > 0 ? (
             menusToShow.map((menu, index) => {
@@ -234,8 +219,8 @@ export default function Sidebar() {
                         transition-all duration-300
                         ${
                           isActive
-                            ? "bg-[#fec335] text-[#102853] menu-active-shadow"
-                            : "bg-gradient-to-r from-[#fec335] to-[#ffd966] text-[#102853] menu-shadow hover:shadow-lg"
+                            ? "bg-primary text-primary-foreground menu-active-shadow"
+                            : "bg-gradient-to-r from-primary to-yellow-300 text-primary-foreground menu-shadow hover:shadow-lg"
                         }
                         hover:scale-[1.02] active:scale-[0.98]
                       `}
@@ -272,8 +257,8 @@ export default function Sidebar() {
                                 border-l-4
                                 ${
                                   isChildActive
-                                    ? "bg-[#102853] text-white border-[#fec335] menu-active-shadow"
-                                    : "bg-white text-slate-700 border-transparent hover:border-[#fec335] hover:bg-slate-50 hover:text-[#102853] hover:translate-x-1"
+                                    ? "bg-primary-foreground text-primary border-primary menu-active-shadow"
+                                    : "bg-background text-foreground border-transparent hover:border-primary hover:bg-muted hover:text-primary-foreground hover:translate-x-1"
                                 }
                               `}
                                 style={{
@@ -305,8 +290,8 @@ export default function Sidebar() {
                     menu-item-enter
                     ${
                       isActive
-                        ? "bg-[#102853] text-white border-[#fec335] menu-active-shadow"
-                        : "bg-white text-slate-700 border-transparent hover:border-[#fec335] hover:bg-gradient-to-r hover:from-slate-50 hover:to-amber-50 hover:text-[#102853] hover:translate-x-1"
+                        ? "bg-primary-foreground text-primary border-primary menu-active-shadow"
+                        : "bg-background text-foreground border-transparent hover:border-primary hover:bg-gradient-to-r hover:from-muted hover:to-muted/50 hover:text-primary-foreground hover:translate-x-1"
                     }
                   `}
                   style={{ animationDelay: `${index * 50}ms` }}
@@ -323,12 +308,12 @@ export default function Sidebar() {
         </nav>
 
         {/* Bottom Decoration */}
-        <div className="p-3 border-t border-slate-200">
+        <div className="p-3 border-t border-border">
           <div
             className="h-1 rounded-full"
             style={{
               background:
-                "linear-gradient(90deg, #102853 0%, #fec335 50%, #102853 100%)",
+                "linear-gradient(90deg, hsl(var(--primary-foreground)) 0%, hsl(var(--primary)) 50%, hsl(var(--primary-foreground)) 100%)",
             }}
           />
         </div>
