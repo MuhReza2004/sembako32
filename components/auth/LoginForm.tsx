@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-import { login } from "@/app/services/auth.service";
-import { getUserById } from "@/app/services/user.service";
+import { useState } from "react";
+import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { login } from "@/app/services/auth.service";
+import { getUserById } from "@/app/services/user.service";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -74,8 +79,18 @@ export default function LoginForm() {
 
   return (
     <Card className="w-[380px]">
-      <CardHeader>
-        <CardTitle>Login Gudang</CardTitle>
+      <CardHeader className="text-center">
+        <Image
+          src="/Logo.svg"
+          alt="Sembako 32 Logo"
+          width={120}
+          height={120}
+          className="mx-auto mb-4"
+        />
+        <CardTitle className="text-2xl font-bold">Login ke Akun Anda</CardTitle>
+        <p className="text-muted-foreground text-sm">
+          Masukkan email & password Anda untuk melanjutkan
+        </p>
       </CardHeader>
 
       <CardContent>
