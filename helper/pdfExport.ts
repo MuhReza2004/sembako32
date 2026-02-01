@@ -6,13 +6,12 @@ import { formatRupiah, formatTanggal } from "./format";
 export const exportPiutangTableToPDF = async (piutang: Penjualan[]) => {
   const pdf = new jsPDF("l", "mm", "a4"); // landscape orientation
 
-  // Add header with company info
-  pdf.setFillColor(41, 128, 185); // Blue header
-  pdf.rect(0, 0, 297, 25, "F");
+  pdf.setFillColor(16, 40, 83); // Blue header
+  pdf.rect(14, 0, 270, 25, "F");
 
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(24);
-  pdf.text("LAPORAN PIUTANG", 14, 18);
+  pdf.text("LAPORAN PIUTANG", 16, 18);
 
   pdf.setFontSize(12);
   pdf.text(
@@ -39,7 +38,7 @@ export const exportPiutangTableToPDF = async (piutang: Penjualan[]) => {
 
   // Header styling
   pdf.setFontSize(10);
-  pdf.setFillColor(52, 152, 219); // Blue header
+  pdf.setFillColor(16, 40, 83); // Blue header
   pdf.rect(14, yPosition - 3, 270, 10, "F");
 
   pdf.setTextColor(255, 255, 255);
@@ -57,7 +56,7 @@ export const exportPiutangTableToPDF = async (piutang: Penjualan[]) => {
 
     // Alternate row colors
     if (index % 2 === 0) {
-      pdf.setFillColor(245, 245, 245);
+      pdf.setFillColor(254, 249, 231);
       pdf.rect(14, yPosition - 3, 270, 8, "F");
     }
 
@@ -103,7 +102,7 @@ export const exportPiutangTableToPDF = async (piutang: Penjualan[]) => {
 
   // Add summary section
   yPosition += 10;
-  pdf.setFillColor(41, 128, 185);
+  pdf.setFillColor(16, 40, 83);
   pdf.rect(14, yPosition, 270, 15, "F");
 
   pdf.setTextColor(255, 255, 255);
@@ -121,8 +120,7 @@ export const exportPiutangTableToPDF = async (piutang: Penjualan[]) => {
   pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(11);
 
-  // Summary boxes
-  pdf.setFillColor(240, 240, 240);
+  pdf.setFillColor(254, 249, 231);
   pdf.rect(14, yPosition, 85, 12, "F");
   pdf.rect(104, yPosition, 85, 12, "F");
   pdf.rect(194, yPosition, 85, 12, "F");
@@ -146,12 +144,12 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
   const pdf = new jsPDF("p", "mm", "a4"); // portrait orientation
 
   // Add header with company branding
-  pdf.setFillColor(41, 128, 185); // Blue header
-  pdf.rect(0, 0, 210, 30, "F");
+  pdf.setFillColor(16, 40, 83); // Blue header
+  pdf.rect(14, 0, 180, 30, "F");
 
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(20);
-  pdf.text("DETAIL PIUTANG", 14, 20);
+  pdf.text("DETAIL PIUTANG", 16, 20);
 
   pdf.setFontSize(10);
   pdf.text(
@@ -165,8 +163,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
 
   let yPosition = 45;
 
-  // Invoice information box
-  pdf.setFillColor(52, 152, 219);
+  pdf.setFillColor(16, 40, 83);
   pdf.rect(14, yPosition, 180, 12, "F");
 
   pdf.setTextColor(255, 255, 255);
@@ -178,7 +175,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
 
   // Invoice details
   pdf.setFontSize(11);
-  pdf.setFillColor(245, 245, 245);
+  pdf.setFillColor(254, 249, 231);
   pdf.rect(14, yPosition, 180, 25, "F");
 
   pdf.text(`No. Invoice: ${piutang.noInvoice}`, 16, yPosition + 6);
@@ -189,7 +186,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
   yPosition += 35;
 
   // Financial summary
-  pdf.setFillColor(46, 204, 113); // Green header
+  pdf.setFillColor(254, 195, 53); // Green header
   pdf.rect(14, yPosition, 180, 12, "F");
 
   pdf.setTextColor(255, 255, 255);
@@ -205,7 +202,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
   const sisaUtang = totalTagihan - totalDibayar;
 
   // Total Tagihan box
-  pdf.setFillColor(240, 240, 240);
+  pdf.setFillColor(254, 249, 231);
   pdf.rect(14, yPosition, 55, 15, "F");
   pdf.setFontSize(9);
   pdf.text("Total Tagihan", 16, yPosition + 6);
@@ -213,7 +210,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
   pdf.text(formatRupiah(totalTagihan), 16, yPosition + 12);
 
   // Total Dibayar box
-  pdf.setFillColor(240, 240, 240);
+  pdf.setFillColor(254, 249, 231);
   pdf.rect(74, yPosition, 55, 15, "F");
   pdf.setFontSize(9);
   pdf.text("Total Dibayar", 76, yPosition + 6);
@@ -225,7 +222,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
     pdf.setFillColor(255, 235, 235);
     pdf.setTextColor(231, 76, 60);
   } else {
-    pdf.setFillColor(240, 240, 240);
+    pdf.setFillColor(254, 249, 231);
     pdf.setTextColor(0, 0, 0);
   }
   pdf.rect(134, yPosition, 55, 15, "F");
@@ -238,7 +235,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
   yPosition += 30;
 
   // Payment history section
-  pdf.setFillColor(155, 89, 182); // Purple header
+  pdf.setFillColor(16, 40, 83); // Purple header
   pdf.rect(14, yPosition, 180, 12, "F");
 
   pdf.setTextColor(255, 255, 255);
@@ -251,7 +248,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
   if (piutang.riwayatPembayaran && piutang.riwayatPembayaran.length > 0) {
     // Table headers
     pdf.setFontSize(10);
-    pdf.setFillColor(52, 152, 219);
+    pdf.setFillColor(16, 40, 83);
     pdf.rect(14, yPosition, 180, 8, "F");
 
     pdf.setTextColor(255, 255, 255);
@@ -268,7 +265,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
     piutang.riwayatPembayaran.forEach((payment, index) => {
       // Alternate row colors
       if (index % 2 === 0) {
-        pdf.setFillColor(250, 250, 250);
+        pdf.setFillColor(254, 249, 231);
         pdf.rect(14, yPosition - 2, 180, 8, "F");
       }
 
@@ -294,7 +291,7 @@ export const exportPiutangDetailToPDF = async (piutang: Penjualan) => {
       }
     });
   } else {
-    pdf.setFillColor(245, 245, 245);
+    pdf.setFillColor(254, 249, 231);
     pdf.rect(14, yPosition, 180, 20, "F");
 
     pdf.setFontSize(10);

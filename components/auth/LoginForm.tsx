@@ -110,12 +110,12 @@ export default function LoginForm() {
             {loading ? "Memproses..." : "Login"}
           </Button>
 
-          <p className="text-sm text-center text-muted-foreground">
+          {/* <p className="text-sm text-center text-muted-foreground">
             Belum punya akun?{" "}
             <a href="/auth/register" className="text-blue-600 hover:underline">
               Daftar
             </a>
-          </p>
+          </p> */}
         </form>
       </CardContent>
     </Card>

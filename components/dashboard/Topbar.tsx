@@ -124,7 +124,7 @@ export default function Topbar() {
                       backgroundClip: "text",
                     }}
                   >
-                    SEMBAKO 32
+                    RPK SEMBAKO 32
                   </h1>
                   <div className="shimmer-effect absolute inset-0 pointer-events-none" />
                 </div>
