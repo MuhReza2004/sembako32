@@ -220,9 +220,11 @@ function TambahPenjualanForm() {
           setItems(penjualan.items || []);
           setStatus(penjualan.status);
           setMetodePembayaran(penjualan.metodePembayaran || "");
-          setNamaBank(penjualan.namaBank || "BNI");
-          setNamaPemilikRekening(penjualan.namaPemilikRekening || "RIZAL");
-          setNomorRekening(penjualan.nomorRekening || "19530117106");
+          setNamaBank(penjualan.namaBank || "BRI");
+          setNamaPemilikRekening(
+            penjualan.namaPemilikRekening || "RAHMAT SYUKUR",
+          );
+          setNomorRekening(penjualan.nomorRekening || "7071 0101 9195 533");
           setTanggalJatuhTempo(penjualan.tanggalJatuhTempo || "");
           setPajakEnabled(penjualan.pajakEnabled || false);
           setDiskon(penjualan.diskon || 0);

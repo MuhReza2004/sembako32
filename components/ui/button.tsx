@@ -19,8 +19,8 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        primary: "bg-[#099696] text-white hover:bg-[#ff6a00] hover:text-white",
-        remove: "bg-[#ff6a00] text-white hover:bg-[#099696] hover:text-white",
+        primary: "bg-[#102853] text-white hover:bg-[#fec335] hover:text-white",
+        remove: "bg-[#fec335] text-white hover:bg-[#102853] hover:text-white",
         nav: "bg-[#099696] text-white hover:bg-[#ffd9a1] hover:text-white",
       },
       size: {

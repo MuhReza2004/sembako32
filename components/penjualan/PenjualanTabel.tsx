@@ -92,10 +92,10 @@ export default function PenjualanTabel({
                   <Badge
                     variant={
                       penjualan.status === "Lunas"
-                        ? "default"
+                        ? "primary"
                         : penjualan.status === "Batal"
-                          ? "secondary"
-                          : "destructive"
+                          ? "remove"
+                          : "remove"
                     }
                   >
                     {penjualan.status}

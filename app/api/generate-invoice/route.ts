@@ -550,7 +550,7 @@ async function generatePdf(
           </div>
             <div class="company-item">
             <span class="label">Kontak</span>
-            <span class="value">0821-9030-9333</span>
+            <span class="value">0821-9927-7377</span>
           </div>
             <div class="company-item">
             <span class="label">Email</span>
