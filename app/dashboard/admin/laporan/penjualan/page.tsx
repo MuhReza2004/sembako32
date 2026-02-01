@@ -4,22 +4,12 @@ import { useEffect, useState } from "react";
 import { Penjualan } from "@/app/types/penjualan";
 import { getAllPenjualan } from "@/app/services/penjualan.service";
 import { DialogDetailPenjualan } from "@/components/penjualan/DialogDetailPenjualan";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { formatRupiah } from "@/helper/format";
-import { Download, Eye, Calendar, FileText } from "lucide-react";
 import * as ExcelJS from "exceljs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { formatRupiah } from "@/helper/format";
+import { PenjualanReportHeader } from "@/components/penjualan/laporan/PenjualanReportHeader";
+import { PenjualanSummaryCards } from "@/components/penjualan/laporan/PenjualanSummaryCards";
+import { PenjualanFilter } from "@/components/penjualan/laporan/PenjualanFilter";
+import { PenjualanTable } from "@/components/penjualan/laporan/PenjualanTable";
 
 export default function PenjualanReportPage() {
   const [data, setData] = useState<Penjualan[]>([]);
@@ -75,7 +65,6 @@ export default function PenjualanReportPage() {
   };
 
   const exportToPDF = async () => {
-    // Open a new tab immediately and show a loading message.
     const newTab = window.open("", "_blank");
     if (!newTab) {
       alert("Gagal membuka tab baru. Mohon izinkan pop-up untuk situs ini.");
@@ -101,12 +90,9 @@ export default function PenjualanReportPage() {
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-
-      // Load the PDF into the already-opened tab.
       newTab.location.href = url;
     } catch (error) {
       console.error("Error exporting PDF:", error);
-      // If an error occurs, show it in the new tab and alert the user.
       if (newTab) {
         newTab.document.body.innerHTML = `<pre>Gagal membuat PDF. Silakan periksa konsol untuk detailnya.</pre>`;
       }
@@ -444,241 +430,33 @@ export default function PenjualanReportPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Laporan Penjualan</h1>
-        <div className="flex gap-2">
-          <Button onClick={exportToPDF} variant="outline">
-            <FileText className="w-4 h-4 mr-2" />
-            Export PDF
-          </Button>
-          <Button onClick={exportToExcel} variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export Excel
-          </Button>
-        </div>
-      </div>
+      <PenjualanReportHeader
+        onExportPDF={exportToPDF}
+        onExportExcel={exportToExcel}
+      />
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Penjualan
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalSales}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Pendapatan (Bruto)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatRupiah(totalRevenue)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pajak</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatRupiah(totalPajak)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Penjualan Bersih (Netto)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatRupiah(penjualanBersih)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Penjualan Lunas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{paidSales}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Penjualan Belum Lunas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{unpaidSales}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Penjualan Batal
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
-              {canceledSales}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <PenjualanSummaryCards
+        totalSales={totalSales}
+        totalRevenue={totalRevenue}
+        totalPajak={totalPajak}
+        penjualanBersih={penjualanBersih}
+        paidSales={paidSales}
+        unpaidSales={unpaidSales}
+        canceledSales={canceledSales}
+      />
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Calendar className="w-5 h-5 mr-2" />
-            Filter Periode
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="startDate">Tanggal Mulai</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="endDate">Tanggal Akhir</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <PenjualanFilter
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+      />
 
-      {/* Sales Table */}
-      <Card>
-        <CardHeader className="flex flex-row justify-between ">
-          <CardTitle>Detail Penjualan</CardTitle>
-          <Button onClick={exportToExcel} variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export Excel
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {filteredData.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              Tidak ada data penjualan untuk periode yang dipilih.
-            </div>
-          ) : (
-            <div className="rounded-lg border overflow-x-auto print:overflow-visible">
-              <Table className="print:text-sm print:border-collapse">
-                <TableHeader>
-                  <TableRow className="bg-gray-100">
-                    <TableHead>Invoice</TableHead>
-                    <TableHead>No. NPB</TableHead>
-                    <TableHead>No. DO</TableHead>
-                    <TableHead>Metode Pengambilan</TableHead>
-                    <TableHead>Tanggal</TableHead>
-                    <TableHead>Pelanggan</TableHead>
-                    <TableHead>Produk Dibeli</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                    <TableHead className="text-center">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((penjualan) => (
-                    <TableRow key={penjualan.id}>
-                      <TableCell className="font-medium">
-                        {penjualan.noInvoice}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {penjualan.noNPB}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {penjualan.noDO || "-"}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {penjualan.metodePengambilan}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(penjualan.tanggal).toLocaleDateString(
-                          "id-ID",
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <p className="font-medium">
-                          {penjualan.namaPelanggan ||
-                            "Pelanggan Tidak Diketahui"}
-                        </p>
-                        {penjualan.alamatPelanggan && (
-                          <p className="text-sm text-gray-500">
-                            {penjualan.alamatPelanggan}
-                          </p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {penjualan.items && penjualan.items.length > 0 ? (
-                          <ul className="list-disc pl-4 text-xs">
-                            {penjualan.items.map((item) => (
-                              <li key={item.id}>
-                                {item.namaProduk} ({item.qty} x{" "}
-                                {formatRupiah(item.hargaJual || 0)})
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-xs text-gray-500">
-                            Tidak ada item
-                          </p>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatRupiah(penjualan.total)}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          className={
-                            penjualan.status === "Lunas"
-                              ? "bg-green-600 text-white hover:bg-green-700"
-                              : penjualan.status === "Batal"
-                                ? "bg-gray-600 text-white hover:bg-gray-700"
-                                : "bg-red-600 text-white hover:bg-red-700"
-                          }
-                        >
-                          {penjualan.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewDetails(penjualan)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <PenjualanTable
+        data={filteredData}
+        onViewDetails={handleViewDetails}
+        onExportExcel={exportToExcel}
+      />
 
       <DialogDetailPenjualan
         open={dialogDetailOpen}
