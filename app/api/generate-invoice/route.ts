@@ -554,7 +554,7 @@ async function generatePdf(
           </div>
             <div class="company-item">
             <span class="label">Email</span>
-            <span class="value">sumberalampasangkayu@gmail.com</span>
+            <span class="value">tigaduaanekapangan@gmail.com</span>
           </div>
             </div>
         </div>

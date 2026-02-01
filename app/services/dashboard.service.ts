@@ -26,6 +26,8 @@ export interface DashboardData {
   lowStockItems: LowStockItem[];
   recentSales: RecentTransaction[];
   recentPurchases: RecentTransaction[];
+  totalPiutang: number;
+  totalNominalPiutang: number;
 }
 
 export interface LowStockItem {
@@ -62,6 +64,7 @@ export const getDashboardData = async (dateRange?: {
       lowStockItems,
       recentSales,
       recentPurchases,
+      piutang,
     ] = await Promise.all([
       getTotalProducts(),
       getTotalCustomers(),
@@ -73,6 +76,7 @@ export const getDashboardData = async (dateRange?: {
       getLowStockItems(),
       getRecentSales(dateRange),
       getRecentPurchases(dateRange),
+      getTotalPiutang(dateRange),
     ]);
 
     return {
@@ -86,6 +90,8 @@ export const getDashboardData = async (dateRange?: {
       lowStockItems,
       recentSales,
       recentPurchases,
+      totalPiutang: piutang.count,
+      totalNominalPiutang: piutang.total,
     };
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
@@ -191,6 +197,36 @@ const getTotalExpenses = async (dateRange?: {
   });
 
   return total;
+};
+
+const getTotalPiutang = async (dateRange?: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<{ count: number; total: number }> => {
+  let q = query(
+    collection(db, "penjualan"),
+    where("status", "==", "Belum Lunas"),
+  );
+
+  if (dateRange && dateRange.startDate && dateRange.endDate) {
+    q = query(
+      q,
+      where("createdAt", ">=", dateRange.startDate),
+      where("createdAt", "<=", dateRange.endDate),
+    );
+  }
+
+  const snap = await getDocs(q);
+
+  let totalNominal = 0;
+  snap.forEach((doc) => {
+    const data = doc.data() as Penjualan;
+    const totalDibayar = data.totalDibayar || 0;
+    const sisaTagihan = data.total - totalDibayar;
+    totalNominal += sisaTagihan;
+  });
+
+  return { count: snap.size, total: totalNominal };
 };
 
 const getLowStockItems = async (): Promise<LowStockItem[]> => {

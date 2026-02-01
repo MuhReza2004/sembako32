@@ -31,6 +31,8 @@ interface DashboardData {
   lowStockItems: any[];
   recentSales: any[];
   recentPurchases: any[];
+  totalPiutang: number;
+  totalNominalPiutang: number;
 }
 
 const getDateRange = (

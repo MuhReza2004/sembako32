@@ -10,6 +10,7 @@ import {
   DollarSign,
   TrendingUp,
   TrendingDown,
+  CreditCard,
 } from "lucide-react";
 
 interface DashboardData {
@@ -23,6 +24,8 @@ interface DashboardData {
   lowStockItems: any[];
   recentSales: any[];
   recentPurchases: any[];
+  totalPiutang: number;
+  totalNominalPiutang: number;
 }
 
 interface SummaryCardsProps {
@@ -91,6 +94,21 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       title: "Total Pengeluaran",
       value: data?.totalExpenses || 0,
       icon: TrendingDown,
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      isCurrency: true,
+    },
+    {
+      title: "Total Piutang",
+      value: data?.totalPiutang || 0,
+      icon: CreditCard,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+    },
+    {
+      title: "Nominal Piutang",
+      value: data?.totalNominalPiutang || 0,
+      icon: DollarSign,
       color: "text-red-600",
       bgColor: "bg-red-50",
       isCurrency: true,
