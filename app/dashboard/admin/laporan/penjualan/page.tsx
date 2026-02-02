@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Penjualan } from "@/app/types/penjualan";
-import { getAllPenjualan } from "@/app/services/penjualan.service";
+import {
+  onSnapshot,
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast,
+  where,
+} from "firebase/firestore";
+import { db } from "@/app/lib/firebase";
 import { DialogDetailPenjualan } from "@/components/penjualan/DialogDetailPenjualan";
 import * as ExcelJS from "exceljs";
 import { formatRupiah } from "@/helper/format";
@@ -10,6 +21,7 @@ import { PenjualanReportHeader } from "@/components/penjualan/laporan/PenjualanR
 import { PenjualanSummaryCards } from "@/components/penjualan/laporan/PenjualanSummaryCards";
 import { PenjualanFilter } from "@/components/penjualan/laporan/PenjualanFilter";
 import { PenjualanTable } from "@/components/penjualan/laporan/PenjualanTable";
+import { Button } from "@/components/ui/button";
 
 export default function PenjualanReportPage() {
   const [data, setData] = useState<Penjualan[]>([]);
@@ -22,42 +34,111 @@ export default function PenjualanReportPage() {
   );
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [firstVisible, setFirstVisible] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const sales = await getAllPenjualan();
-        setData(sales);
-        setFilteredData(sales);
-      } catch (err: any) {
-        console.error("Error fetching sales:", err);
-        setError("Gagal memuat data penjualan.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    let filtered = data;
+    setIsLoading(true);
+    let q = query(
+      collection(db, "penjualan"),
+      orderBy("tanggal", "desc"),
+    );
 
     if (startDate) {
-      filtered = filtered.filter(
-        (sale) => new Date(sale.tanggal) >= new Date(startDate),
-      );
+      q = query(q, where("tanggal", ">=", new Date(startDate).toISOString()));
     }
-
     if (endDate) {
-      filtered = filtered.filter(
-        (sale) => new Date(sale.tanggal) <= new Date(endDate),
-      );
+      q = query(q, where("tanggal", "<=", new Date(endDate).toISOString()));
     }
 
-    setFilteredData(filtered);
-  }, [data, startDate, endDate]);
+    q = query(q, limit(perPage));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Penjualan,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setIsLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching sales:", err);
+        setError("Gagal memuat data penjualan.");
+        setIsLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [perPage, startDate, endDate]);
+
+  const fetchNext = () => {
+    setIsLoading(true);
+    let q = query(
+      collection(db, "penjualan"),
+      orderBy("tanggal", "desc"),
+      startAfter(lastVisible),
+    );
+
+    if (startDate) {
+      q = query(q, where("tanggal", ">=", new Date(startDate).toISOString()));
+    }
+    if (endDate) {
+      q = query(q, where("tanggal", "<=", new Date(endDate).toISOString()));
+    }
+
+    q = query(q, limit(perPage));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Penjualan,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page + 1);
+      }
+      setIsLoading(false);
+    });
+    return unsubscribe;
+  };
+
+  const fetchPrev = () => {
+    setIsLoading(true);
+    let q = query(
+      collection(db, "penjualan"),
+      orderBy("tanggal", "desc"),
+      endBefore(firstVisible),
+    );
+
+    if (startDate) {
+      q = query(q, where("tanggal", ">=", new Date(startDate).toISOString()));
+    }
+    if (endDate) {
+      q = query(q, where("tanggal", "<=", new Date(endDate).toISOString()));
+    }
+
+    q = query(q, limitToLast(perPage));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Penjualan,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page - 1);
+      }
+      setIsLoading(false);
+    });
+    return unsubscribe;
+  };
 
   const handleViewDetails = (penjualan: Penjualan) => {
     setSelectedPenjualan(penjualan);
@@ -394,23 +475,19 @@ export default function PenjualanReportPage() {
     }
   };
 
-  const totalSales = filteredData.length;
-  const activeSales = filteredData.filter((sale) => sale.status !== "Batal");
+  const totalSales = data.length;
+  const activeSales = data.filter((sale) => sale.status !== "Batal");
   const totalRevenue = activeSales.reduce((sum, sale) => sum + sale.total, 0);
   const totalPajak = activeSales.reduce(
     (sum, sale) => sum + (sale.pajak || 0),
     0,
   );
   const penjualanBersih = totalRevenue - totalPajak;
-  const paidSales = filteredData.filter(
-    (sale) => sale.status === "Lunas",
-  ).length;
-  const unpaidSales = filteredData.filter(
+  const paidSales = data.filter((sale) => sale.status === "Lunas").length;
+  const unpaidSales = data.filter(
     (sale) => sale.status === "Belum Lunas",
   ).length;
-  const canceledSales = filteredData.filter(
-    (sale) => sale.status === "Batal",
-  ).length;
+  const canceledSales = data.filter((sale) => sale.status === "Batal").length;
 
   if (isLoading) {
     return (
@@ -453,10 +530,30 @@ export default function PenjualanReportPage() {
       />
 
       <PenjualanTable
-        data={filteredData}
+        data={data}
         onViewDetails={handleViewDetails}
         onExportExcel={exportToExcel}
       />
+
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchPrev}
+          disabled={page === 1 || isLoading}
+        >
+          Sebelumnya
+        </Button>
+        <span className="text-sm">Halaman {page}</span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchNext}
+          disabled={data.length < perPage || isLoading}
+        >
+          Berikutnya
+        </Button>
+      </div>
 
       <DialogDetailPenjualan
         open={dialogDetailOpen}

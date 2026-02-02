@@ -14,7 +14,16 @@ import {
   deletePelanggan,
   updatePelanggan,
 } from "@/app/services/pelanggan.service";
-import { onSnapshot, collection, query, orderBy } from "firebase/firestore";
+import {
+  onSnapshot,
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast,
+} from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 
 export default function PelangganAdminPage() {
@@ -30,14 +39,22 @@ export default function PelangganAdminPage() {
     null,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [firstVisible, setFirstVisible] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   // Filter & Search
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load pelanggan in real-time
+  // Load pelanggan in real-time with pagination
   useEffect(() => {
     setIsLoading(true);
-    const q = query(collection(db, "pelanggan"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "pelanggan"),
+      orderBy("createdAt", "desc"),
+      limit(perPage),
+    );
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -45,6 +62,8 @@ export default function PelangganAdminPage() {
           (doc) => ({ id: doc.id, ...doc.data() }) as Pelanggan,
         );
         setCustomers(data);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
         setIsLoading(false);
       },
       (err) => {
@@ -55,7 +74,49 @@ export default function PelangganAdminPage() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [perPage]);
+
+  const fetchNext = () => {
+    const q = query(
+      collection(db, "pelanggan"),
+      orderBy("createdAt", "desc"),
+      startAfter(lastVisible),
+      limit(perPage),
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pelanggan,
+        );
+        setCustomers(data);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page + 1);
+      }
+    });
+    return unsubscribe;
+  };
+
+  const fetchPrev = () => {
+    const q = query(
+      collection(db, "pelanggan"),
+      orderBy("createdAt", "desc"),
+      endBefore(firstVisible),
+      limitToLast(perPage),
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pelanggan,
+        );
+        setCustomers(data);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page - 1);
+      }
+    });
+    return unsubscribe;
+  };
 
   const showSuccess = (message: string) => {
     setSuccess(message);
@@ -201,6 +262,15 @@ export default function PelangganAdminPage() {
         onDelete={handleDeleteClick}
         searchTerm={searchTerm}
       />
+
+      <div className="flex justify-end gap-4 mt-4">
+        <Button onClick={fetchPrev} disabled={page === 1}>
+          Previous
+        </Button>
+        <Button onClick={fetchNext} disabled={customers.length < perPage}>
+          Next
+        </Button>
+      </div>
 
       <DialogTambahPelanggan
         open={dialogTambahOpen}

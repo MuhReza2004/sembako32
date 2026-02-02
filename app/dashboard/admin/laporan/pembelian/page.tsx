@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Pembelian } from "@/app/types/pembelian";
-import { getAllPembelian } from "@/app/services/pembelian.service";
+import {
+  onSnapshot,
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast,
+  where,
+} from "firebase/firestore";
+import { db } from "@/app/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,39 +38,111 @@ export default function PembelianReportPage() {
   const [error, setError] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [firstVisible, setFirstVisible] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const purchases = await getAllPembelian();
-        setData(purchases);
-        setFilteredData(purchases);
-      } catch (err: any) {
-        console.error("Error fetching purchases:", err);
-        setError("Gagal memuat data pembelian.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
+    let q = query(
+      collection(db, "pembelian"),
+      orderBy("tanggal", "desc"),
+    );
 
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    let filtered = data;
     if (startDate) {
-      filtered = filtered.filter(
-        (purchase) => new Date(purchase.tanggal) >= new Date(startDate),
-      );
+      q = query(q, where("tanggal", ">=", new Date(startDate).toISOString()));
     }
     if (endDate) {
-      filtered = filtered.filter(
-        (purchase) => new Date(purchase.tanggal) <= new Date(endDate),
-      );
+      q = query(q, where("tanggal", "<=", new Date(endDate).toISOString()));
     }
-    setFilteredData(filtered);
-  }, [data, startDate, endDate]);
+
+    q = query(q, limit(perPage));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setIsLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching purchases:", err);
+        setError("Gagal memuat data pembelian.");
+        setIsLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [perPage, startDate, endDate]);
+
+  const fetchNext = () => {
+    setIsLoading(true);
+    let q = query(
+      collection(db, "pembelian"),
+      orderBy("tanggal", "desc"),
+      startAfter(lastVisible),
+    );
+
+    if (startDate) {
+      q = query(q, where("tanggal", ">=", new Date(startDate).toISOString()));
+    }
+    if (endDate) {
+      q = query(q, where("tanggal", "<=", new Date(endDate).toISOString()));
+    }
+
+    q = query(q, limit(perPage));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page + 1);
+      }
+      setIsLoading(false);
+    });
+    return unsubscribe;
+  };
+
+  const fetchPrev = () => {
+    setIsLoading(true);
+    let q = query(
+      collection(db, "pembelian"),
+      orderBy("tanggal", "desc"),
+      endBefore(firstVisible),
+    );
+
+    if (startDate) {
+      q = query(q, where("tanggal", ">=", new Date(startDate).toISOString()));
+    }
+    if (endDate) {
+      q = query(q, where("tanggal", "<=", new Date(endDate).toISOString()));
+    }
+
+    q = query(q, limitToLast(perPage));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page - 1);
+      }
+      setIsLoading(false);
+    });
+    return unsubscribe;
+  };
 
   const exportToPDF = async () => {
     const newTab = window.open("", "_blank");
@@ -98,15 +181,12 @@ export default function PembelianReportPage() {
     // ...
   };
 
-  const totalPurchases = filteredData.length;
-  const totalCost = filteredData.reduce(
-    (sum, purchase) => sum + purchase.total,
-    0,
-  );
-  const paidPurchases = filteredData.filter(
+  const totalPurchases = data.length;
+  const totalCost = data.reduce((sum, purchase) => sum + purchase.total, 0);
+  const paidPurchases = data.filter(
     (purchase) => purchase.status === "Lunas",
   ).length;
-  const unpaidPurchases = filteredData.filter(
+  const unpaidPurchases = data.filter(
     (purchase) => purchase.status === "Belum Lunas",
   ).length;
 
@@ -218,7 +298,7 @@ export default function PembelianReportPage() {
           <CardTitle>Detail Pembelian</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredData.length === 0 ? (
+          {data.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               Tidak ada data pembelian untuk periode yang dipilih.
             </div>
@@ -238,7 +318,7 @@ export default function PembelianReportPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.map((purchase, index) => (
+                  {data.map((purchase, index) => (
                     <TableRow key={purchase.id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
@@ -287,6 +367,15 @@ export default function PembelianReportPage() {
           )}
         </CardContent>
       </Card>
+
+      <div className="flex justify-end gap-4 mt-4">
+        <Button onClick={fetchPrev} disabled={page === 1 || isLoading}>
+          Previous
+        </Button>
+        <Button onClick={fetchNext} disabled={data.length < perPage || isLoading}>
+          Next
+        </Button>
+      </div>
     </div>
   );
 }

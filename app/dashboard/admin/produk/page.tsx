@@ -15,7 +15,16 @@ import {
 } from "@/app/services/produk.service";
 import { Produk, ProdukFormData } from "@/app/types/produk";
 import { Plus, Search } from "lucide-react";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast,
+} from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 
 export default function ProdukAdminPage() {
@@ -30,22 +39,31 @@ export default function ProdukAdminPage() {
   const [dialogHapusOpen, setDialogHapusOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Produk | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [firstVisible, setFirstVisible] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   // Filter & Search
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load produk in real-time
+  // Load produk in real-time with pagination
   useEffect(() => {
     setIsLoading(true);
-    const q = query(collection(db, "produk"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "produk"),
+      orderBy("createdAt", "desc"),
+      limit(perPage),
+    );
     const unsubscribe = onSnapshot(
       q,
       (querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Produk[];
+        const data = querySnapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Produk,
+        );
         setProducts(data);
+        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+        setFirstVisible(querySnapshot.docs[0]);
         setIsLoading(false);
       },
       (err) => {
@@ -57,7 +75,49 @@ export default function ProdukAdminPage() {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [perPage]);
+
+  const fetchNext = () => {
+    const q = query(
+      collection(db, "produk"),
+      orderBy("createdAt", "desc"),
+      startAfter(lastVisible),
+      limit(perPage),
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Produk,
+        );
+        setProducts(data);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page + 1);
+      }
+    });
+    return unsubscribe;
+  };
+
+  const fetchPrev = () => {
+    const q = query(
+      collection(db, "produk"),
+      orderBy("createdAt", "desc"),
+      endBefore(firstVisible),
+      limitToLast(perPage),
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Produk,
+        );
+        setProducts(data);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page - 1);
+      }
+    });
+    return unsubscribe;
+  };
 
   // Show success message
   const showSuccess = (message: string) => {
@@ -204,6 +264,15 @@ export default function ProdukAdminPage() {
         onDelete={handleDeleteClick}
         searchTerm={searchTerm}
       />
+
+      <div className="flex justify-end gap-4 mt-4">
+        <Button onClick={fetchPrev} disabled={page === 1}>
+          Previous
+        </Button>
+        <Button onClick={fetchNext} disabled={products.length < perPage}>
+          Next
+        </Button>
+      </div>
 
       {/* Dialog Tambah */}
       <DialogTambahProduk

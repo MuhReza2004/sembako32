@@ -3,7 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getAllPembelian } from "@/app/services/pembelian.service";
+import {
+  onSnapshot,
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast,
+} from "firebase/firestore";
+import { db } from "@/app/lib/firebase";
 import { Pembelian } from "@/app/types/pembelian";
 import PembelianTable from "@/components/pembelian/pembelianTabel";
 import { Button } from "@/components/ui/button";
@@ -18,20 +28,84 @@ export default function PagePembelian() {
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await getAllPembelian();
-      setData(res);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [firstVisible, setFirstVisible] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [totalPembelian, setTotalPembelian] = useState(0); // To store total count for pagination info
 
   useEffect(() => {
-    loadData();
-  }, []);
+    setLoading(true);
+    const q = query(
+      collection(db, "pembelian"),
+      orderBy("tanggal", "desc"),
+      limit(perPage),
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching pembelian:", err);
+        setLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [perPage]);
+
+  const fetchNext = () => {
+    setLoading(true);
+    const q = query(
+      collection(db, "pembelian"),
+      orderBy("tanggal", "desc"),
+      startAfter(lastVisible),
+      limit(perPage),
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page + 1);
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
+  };
+
+  const fetchPrev = () => {
+    setLoading(true);
+    const q = query(
+      collection(db, "pembelian"),
+      orderBy("tanggal", "desc"),
+      endBefore(firstVisible),
+      limitToLast(perPage),
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+        );
+        setData(fetchedData);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setFirstVisible(snapshot.docs[0]);
+        setPage(page - 1);
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -98,6 +172,15 @@ export default function PagePembelian() {
           endDate={endDate}
         />
       )}
+
+      <div className="flex justify-end gap-4 mt-4">
+        <Button onClick={fetchPrev} disabled={page === 1 || loading}>
+          Previous
+        </Button>
+        <Button onClick={fetchNext} disabled={data.length < perPage || loading}>
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
