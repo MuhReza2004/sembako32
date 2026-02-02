@@ -52,7 +52,7 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [pembelianToConfirm, setPembelianToConfirm] = useState<
-    (Omit<Pembelian, "id" | "status"> & { items: PembelianDetail[] }) | null
+    (Omit<Pembelian, "id" | "createdAt" | "updatedAt" | "namaSupplier"> & { items: PembelianDetail[] }) | null
   >(null);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
       return;
     }
 
-    const pembelianData = {
+    const pembelianData: Omit<Pembelian, "id" | "createdAt" | "updatedAt" | "namaSupplier"> & { items: PembelianDetail[] } = {
       supplierId,
       tanggal,
       noDO,

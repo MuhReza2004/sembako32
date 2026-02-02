@@ -108,10 +108,10 @@ export async function POST(request: NextRequest) {
     const totalPurchases = filteredPurchases.length;
     const totalCost = filteredPurchases.reduce((sum, p) => sum + p.total, 0);
     const paidPurchases = filteredPurchases.filter(
-      (p) => p.status === "Pending",
+      (p) => p.status === "Completed",
     ).length;
     const unpaidPurchases = filteredPurchases.filter(
-      (p) => p.status === "Completed",
+      (p) => p.status === "Pending" || p.status === "Decline",
     ).length;
 
     const htmlContent = `
@@ -245,8 +245,8 @@ export async function POST(request: NextRequest) {
             }
             
             .status-lunas {
-              background-color: #fff9e6;
-              color: #102853;
+              background-color: #e6ffed; /* Light green for paid */
+              color: #28a745; /* Darker green */
               padding: 3px 8px;
               border-radius: 4px;
               font-size: 8px;
@@ -257,8 +257,8 @@ export async function POST(request: NextRequest) {
             }
 
             .status-belum-lunas {
-              background-color: #102853;
-              color: #ffffff;
+              background-color: #ffe6e6; /* Light red for unpaid */
+              color: #dc3545; /* Darker red */
               padding: 3px 8px;
               border-radius: 4px;
               font-size: 8px;
@@ -357,6 +357,25 @@ export async function POST(request: NextRequest) {
               </span>
             </div>
 
+            <div class="summary-legend">
+                <div class="summary-item">
+                    <span class="summary-item-label">Total Pembelian:</span>
+                    <span class="summary-item-value">${totalPurchases}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-item-label">Total Dibayar:</span>
+                    <span class="summary-item-value">${paidPurchases}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-item-label">Total Belum Dibayar:</span>
+                    <span class="summary-item-value">${unpaidPurchases}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-item-label">Total Biaya:</span>
+                    <span class="summary-item-value">${formatRupiah(totalCost)}</span>
+                </div>
+            </div>
+
             <div class="table-container">
               <table>
                 <thead>
@@ -395,8 +414,8 @@ export async function POST(request: NextRequest) {
                       </td>
                       <td class="text-center"><strong style="color: #102853; font-size: 10px;">${formatRupiah(p.total)}</strong></td>
                       <td class="text-center">
-                        <span class="${p.status === "Lunas" ? "status-lunas" : "status-belum-lunas"}">
-                          ${p.status}
+                        <span class="${p.status === "Completed" ? "status-lunas" : "status-belum-lunas"}">
+                          ${p.status === "Completed" ? "Lunas" : p.status === "Pending" ? "Pending" : "Decline"}
                         </span>
                       </td>
                     </tr>

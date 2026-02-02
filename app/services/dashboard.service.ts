@@ -49,8 +49,8 @@ export interface RecentTransaction {
 }
 
 export const getDashboardData = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<DashboardData> => {
   try {
     const [
@@ -118,8 +118,8 @@ const getTotalSuppliers = async (): Promise<number> => {
 };
 
 const getTotalSales = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<number> => {
   let q = query(collection(db, "penjualan"));
   if (dateRange && dateRange.startDate && dateRange.endDate) {
@@ -134,8 +134,8 @@ const getTotalSales = async (dateRange?: {
 };
 
 const getTotalPurchases = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<number> => {
   let q = query(collection(db, "pembelian"));
   if (dateRange && dateRange.startDate && dateRange.endDate) {
@@ -150,8 +150,8 @@ const getTotalPurchases = async (dateRange?: {
 };
 
 const getTotalRevenue = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<number> => {
   let q = query(collection(db, "penjualan"));
   if (dateRange && dateRange.startDate && dateRange.endDate) {
@@ -175,8 +175,8 @@ const getTotalRevenue = async (dateRange?: {
 };
 
 const getTotalExpenses = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<number> => {
   let q = query(collection(db, "pembelian"));
   if (dateRange && dateRange.startDate && dateRange.endDate) {
@@ -200,8 +200,8 @@ const getTotalExpenses = async (dateRange?: {
 };
 
 const getTotalPiutang = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<{ count: number; total: number }> => {
   let q = query(
     collection(db, "penjualan"),
@@ -272,8 +272,8 @@ const getLowStockItems = async (): Promise<LowStockItem[]> => {
 };
 
 const getRecentSales = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<RecentTransaction[]> => {
   let q;
   if (dateRange && dateRange.startDate && dateRange.endDate) {
@@ -324,8 +324,8 @@ const getRecentSales = async (dateRange?: {
 };
 
 const getRecentPurchases = async (dateRange?: {
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
 }): Promise<RecentTransaction[]> => {
   let q;
   if (dateRange && dateRange.startDate && dateRange.endDate) {

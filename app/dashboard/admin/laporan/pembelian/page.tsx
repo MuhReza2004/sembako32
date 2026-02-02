@@ -184,10 +184,10 @@ export default function PembelianReportPage() {
   const totalPurchases = data.length;
   const totalCost = data.reduce((sum, purchase) => sum + purchase.total, 0);
   const paidPurchases = data.filter(
-    (purchase) => purchase.status === "Lunas",
+    (purchase) => purchase.status === "Completed",
   ).length;
   const unpaidPurchases = data.filter(
-    (purchase) => purchase.status === "Belum Lunas",
+    (purchase) => purchase.status === "Pending" || purchase.status === "Decline",
   ).length;
 
   if (isLoading) {
@@ -351,12 +351,12 @@ export default function PembelianReportPage() {
                       <TableCell className="text-center">
                         <Badge
                           className={
-                            purchase.status === "Lunas"
+                            purchase.status === "Completed"
                               ? "bg-green-600"
                               : "bg-red-600"
                           }
                         >
-                          {purchase.status}
+                          {purchase.status === "Completed" ? "Lunas" : purchase.status === "Pending" ? "Pending" : "Ditolak"}
                         </Badge>
                       </TableCell>
                     </TableRow>

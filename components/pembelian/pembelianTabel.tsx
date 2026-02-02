@@ -38,11 +38,13 @@ export default function PembelianTable({
   searchTerm,
   startDate,
   endDate,
+  refreshData,
 }: {
   data: Pembelian[];
   searchTerm: string;
   startDate: string;
   endDate: string;
+  refreshData: () => void;
 }) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Produk[]>([]);
@@ -52,18 +54,8 @@ export default function PembelianTable({
   );
   const [detailOpen, setDetailOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [localData, setLocalData] = useState<Pembelian[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  useEffect(() => {
-    setLocalData(data);
-  }, [data]);
-
-  const refreshData = async () => {
-    const freshData = await getAllPembelian();
-    setLocalData(freshData);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,9 +69,9 @@ export default function PembelianTable({
     fetchData();
   }, []);
 
-  useEffect(() => {
+  const processedData = useMemo(() => {
     if (products.length > 0 && supplierProduks.length > 0) {
-      const updatedData = data.map((p) => ({
+      return data.map((p) => ({
         ...p,
         items: p.items?.map((item) => {
           const supplierProduk = supplierProduks.find(
@@ -94,12 +86,12 @@ export default function PembelianTable({
           };
         }),
       }));
-      setLocalData(updatedData);
     }
+    return data;
   }, [data, products, supplierProduks]);
 
   const filteredData = useMemo(() => {
-    let filtered = localData;
+    let filtered = processedData;
 
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
@@ -126,7 +118,7 @@ export default function PembelianTable({
     }
 
     return filtered;
-  }, [localData, searchTerm, startDate, endDate, suppliers]);
+  }, [processedData, searchTerm, startDate, endDate, suppliers]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 

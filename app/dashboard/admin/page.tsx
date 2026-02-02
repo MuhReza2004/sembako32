@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { LowStockAlerts } from "@/components/dashboard/LowStockAlerts";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
-import { getDashboardData } from "@/app/services/dashboard.service";
+import { useDashboardData } from "@/app/hooks/useDashboard";
 import { useRouter } from "next/navigation";
-import { collection, query, onSnapshot } from "firebase/firestore";
 import {
   Select,
   SelectContent,
@@ -18,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 
 interface DashboardData {
@@ -78,58 +78,45 @@ const getDateRange = (
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState("all");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
 
-  const filterConfigRef = useRef({ dateFilter, startDate, endDate });
-  filterConfigRef.current = { dateFilter, startDate, endDate };
-
-  const updateDashboardData = async () => {
-    try {
-      const { dateFilter, startDate, endDate } = filterConfigRef.current;
-      let dateRange;
-
-      if (dateFilter === "custom" && startDate && endDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        dateRange = { startDate: start, endDate: end };
-      } else {
-        dateRange = getDateRange(dateFilter);
-      }
-
-      const dashboardData = await getDashboardData(dateRange);
-      setData(dashboardData);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error updating dashboard data:", err);
-      setError("Gagal memperbarui data dashboard");
-    } finally {
-      setIsLoading(false);
+  const selectedDateRange = React.useMemo(() => {
+    if (dateFilter === "custom" && customStartDate && customEndDate) {
+      const start = new Date(customStartDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(customEndDate);
+      end.setHours(23, 59, 59, 999);
+      return { startDate: start, endDate: end };
+    } else {
+      return getDateRange(dateFilter);
     }
-  };
+  }, [dateFilter, customStartDate, customEndDate]);
+
+  const {
+    data: dashboardData,
+    isLoading,
+    error,
+    refetch,
+  } = useDashboardData(selectedDateRange);
 
   useEffect(() => {
-    setIsLoading(true);
-    updateDashboardData();
-  }, [dateFilter, startDate, endDate]);
+    // Only set up listeners if we are not in a custom date range that is empty
+    const shouldListen = !(dateFilter === "custom" && (!customStartDate || !customEndDate));
 
-  useEffect(() => {
-    const listeners = [
-      onSnapshot(query(collection(db, "penjualan")), updateDashboardData),
-      onSnapshot(query(collection(db, "pembelian")), updateDashboardData),
-      onSnapshot(query(collection(db, "produk")), updateDashboardData),
-      onSnapshot(query(collection(db, "pelanggan")), updateDashboardData),
-      onSnapshot(query(collection(db, "suppliers")), updateDashboardData),
-      onSnapshot(query(collection(db, "supplier_produk")), updateDashboardData),
-    ];
-    return () => listeners.forEach((unsub) => unsub());
-  }, []);
+    if (shouldListen) {
+        const listeners = [
+            onSnapshot(query(collection(db, "penjualan")), () => refetch()),
+            onSnapshot(query(collection(db, "pembelian")), () => refetch()),
+            onSnapshot(query(collection(db, "produk")), () => refetch()),
+            onSnapshot(query(collection(db, "pelanggan")), () => refetch()),
+            onSnapshot(query(collection(db, "suppliers")), () => refetch()),
+            onSnapshot(query(collection(db, "supplier_produk")), () => refetch()),
+        ];
+        return () => listeners.forEach((unsub) => unsub());
+    }
+  }, [refetch, dateFilter, customStartDate, customEndDate]);
 
   const handleViewInventory = () => router.push("/dashboard/admin/inventory");
   const handleViewSales = () =>
@@ -145,7 +132,7 @@ export default function AdminDashboardPage() {
           <p>Selamat datang, Admin Gudang 👋</p>
         </div>
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+          {error.message || "Terjadi kesalahan saat memuat data."}
         </div>
       </div>
     );
@@ -174,14 +161,7 @@ export default function AdminDashboardPage() {
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            onClick={() => {
-              setIsLoading(true);
-              updateDashboardData();
-            }}
-          >
-            Refresh Data
-          </Button>
+          <Button onClick={() => refetch()} disabled={isLoading}>Refresh Data</Button>
         </div>
       </div>
 
@@ -194,8 +174,8 @@ export default function AdminDashboardPage() {
                 <Input
                   id="startDate"
                   type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
                 />
               </div>
               <div>
@@ -203,8 +183,8 @@ export default function AdminDashboardPage() {
                 <Input
                   id="endDate"
                   type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
                 />
               </div>
             </div>
@@ -212,17 +192,17 @@ export default function AdminDashboardPage() {
         </Card>
       )}
 
-      <SummaryCards data={data} isLoading={isLoading} />
+      <SummaryCards data={dashboardData ?? null} isLoading={isLoading} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LowStockAlerts
-          items={data?.lowStockItems || []}
+          items={dashboardData?.lowStockItems || []}
           isLoading={isLoading}
           onViewInventory={handleViewInventory}
         />
         <RecentTransactions
-          sales={data?.recentSales || []}
-          purchases={data?.recentPurchases || []}
+          sales={dashboardData?.recentSales || []}
+          purchases={dashboardData?.recentPurchases || []}
           isLoading={isLoading}
           onViewSales={handleViewSales}
           onViewPurchases={handleViewPurchases}

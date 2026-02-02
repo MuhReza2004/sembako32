@@ -103,7 +103,7 @@ function TambahPenjualanForm() {
     supplierProdukId: "",
     qty: 1,
   });
-  const [status, setStatus] = useState<"Lunas" | "Belum Lunas">("Lunas");
+  const [status, setStatus] = useState<"Lunas" | "Belum Lunas" | "Batal">("Lunas");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingPenjualan, setEditingPenjualan] = useState<Penjualan | null>(

@@ -128,10 +128,13 @@ export default function PelangganAdminPage() {
   };
 
   const handleTambahSubmit = async (data: PelangganFormData) => {
-    const duplicateNIB = checkDuplicateNIB(data.nib);
-    if (duplicateNIB) {
-      setError(`NIB sudah terdaftar atas nama: ${duplicateNIB.namaToko}`);
-      return;
+    // Only check for duplicate NIB if it's provided
+    if (data.nib) {
+      const duplicateNIB = checkDuplicateNIB(data.nib);
+      if (duplicateNIB) {
+        setError(`NIB sudah terdaftar atas nama: ${duplicateNIB.namaToko}`);
+        return;
+      }
     }
 
     try {
