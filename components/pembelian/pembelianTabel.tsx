@@ -77,6 +77,27 @@ export default function PembelianTable({
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (products.length > 0 && supplierProduks.length > 0) {
+      const updatedData = data.map((p) => ({
+        ...p,
+        items: p.items?.map((item) => {
+          const supplierProduk = supplierProduks.find(
+            (sp) => sp.id === item.supplierProdukId,
+          );
+          const product = products.find(
+            (pr) => pr.id === supplierProduk?.produkId,
+          );
+          return {
+            ...item,
+            namaProduk: product?.nama || "Unknown Product",
+          };
+        }),
+      }));
+      setLocalData(updatedData);
+    }
+  }, [data, products, supplierProduks]);
+
   const filteredData = useMemo(() => {
     let filtered = localData;
 
@@ -113,7 +134,6 @@ export default function PembelianTable({
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredData, currentPage]);
-
 
   // Hitung total per bulan
   const totalPerBulan = useMemo(() => {
@@ -280,37 +300,21 @@ export default function PembelianTable({
                   <TableCell>
                     {p.items && p.items.length > 1 ? (
                       <div className="space-y-1">
-                        {p.items.map((item, index) => {
-                          const supplierProduk = supplierProduks.find(
-                            (sp) => sp.id === item.supplierProdukId,
-                          );
-                          const product = products.find(
-                            (pr) => pr.id === supplierProduk?.produkId,
-                          );
-                          return (
-                            <div
-                              key={index}
-                              className="flex items-start gap-2 text-sm"
-                            >
-                              <span className="text-blue-600 mt-0.5">•</span>
-                              <span className="text-gray-700">
-                                {product?.nama || "Unknown Product"}
-                              </span>
-                            </div>
-                          );
-                        })}
+                        {p.items.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-2 text-sm"
+                          >
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-gray-700">
+                              {item.namaProduk || "Unknown Product"}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <span className="text-gray-700">
-                        {(() => {
-                          const supplierProduk = supplierProduks.find(
-                            (sp) => sp.id === p.items?.[0]?.supplierProdukId,
-                          );
-                          const product = products.find(
-                            (pr) => pr.id === supplierProduk?.produkId,
-                          );
-                          return product?.nama || "Unknown Product";
-                        })()}
+                        {p.items?.[0]?.namaProduk || "Unknown Product"}
                       </span>
                     )}
                   </TableCell>

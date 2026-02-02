@@ -35,31 +35,21 @@ export default function PagePembelian() {
   const [totalPembelian, setTotalPembelian] = useState(0); // To store total count for pagination info
 
   useEffect(() => {
-    setLoading(true);
-    const q = query(
-      collection(db, "pembelian"),
-      orderBy("tanggal", "desc"),
-      limit(perPage),
-    );
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const fetchedData = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
-        );
-        setData(fetchedData);
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-        setFirstVisible(snapshot.docs[0]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const { getAllPembelian } =
+          await import("@/app/services/pembelian.service");
+        const allData = await getAllPembelian();
+        setData(allData);
         setLoading(false);
-      },
-      (err) => {
+      } catch (err) {
         console.error("Error fetching pembelian:", err);
         setLoading(false);
-      },
-    );
-
-    return () => unsubscribe();
-  }, [perPage]);
+      }
+    };
+    fetchData();
+  }, []);
 
   const fetchNext = () => {
     setLoading(true);
