@@ -9,14 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  where,
-} from "firebase/firestore";
-import { db } from "@/app/lib/firebase";
+import { getAllPembelian } from "@/app/services/pembelian.service";
 
 export default function PembelianPage() {
   const router = useRouter();
@@ -27,39 +20,37 @@ export default function PembelianPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const refreshData = () => {
+  const refreshData = async () => {
     setIsLoading(true);
-    let q = query(collection(db, "pembelian"), orderBy("tanggal", "desc"));
+    try {
+      const allPembelian = await getAllPembelian();
 
-    if (startDate) {
-      q = query(q, where("tanggal", ">=", startDate));
-    }
-    if (endDate) {
-      q = query(q, where("tanggal", "<=", endDate));
-    }
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const fetchedData = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() }) as Pembelian,
+      // Filter by date range if specified
+      let filteredPembelian = allPembelian;
+      if (startDate) {
+        filteredPembelian = filteredPembelian.filter(
+          (p) => new Date(p.tanggal) >= new Date(startDate),
         );
-        setPembelianData(fetchedData);
-        setIsLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching pembelian:", err);
-        setError("Gagal memuat data pembelian.");
-        setIsLoading(false);
-      },
-    );
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filteredPembelian = filteredPembelian.filter(
+          (p) => new Date(p.tanggal) <= end,
+        );
+      }
 
-    return unsubscribe;
+      setPembelianData(filteredPembelian);
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error fetching pembelian:", err);
+      setError("Gagal memuat data pembelian.");
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    const unsubscribe = refreshData();
-    return () => unsubscribe();
+    refreshData();
   }, [startDate, endDate]); // Re-run when date filters change
 
   if (error) {
@@ -69,10 +60,12 @@ export default function PembelianPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Daftar Pembelian
-        </h1>
-        <Button onClick={() => router.push("/dashboard/admin/transaksi/pembelian/tambah")}>
+        <h1 className="text-3xl font-bold text-gray-900">Daftar Pembelian</h1>
+        <Button
+          onClick={() =>
+            router.push("/dashboard/admin/transaksi/pembelian/tambah")
+          }
+        >
           <Plus className="w-4 h-4 mr-2" />
           Tambah Pembelian
         </Button>

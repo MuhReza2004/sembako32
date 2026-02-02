@@ -69,29 +69,8 @@ export default function PembelianTable({
     fetchData();
   }, []);
 
-  const processedData = useMemo(() => {
-    if (products.length > 0 && supplierProduks.length > 0) {
-      return data.map((p) => ({
-        ...p,
-        items: p.items?.map((item) => {
-          const supplierProduk = supplierProduks.find(
-            (sp) => sp.id === item.supplierProdukId,
-          );
-          const product = products.find(
-            (pr) => pr.id === supplierProduk?.produkId,
-          );
-          return {
-            ...item,
-            namaProduk: product?.nama || "Unknown Product",
-          };
-        }),
-      }));
-    }
-    return data;
-  }, [data, products, supplierProduks]);
-
   const filteredData = useMemo(() => {
-    let filtered = processedData;
+    let filtered = data;
 
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
@@ -118,7 +97,7 @@ export default function PembelianTable({
     }
 
     return filtered;
-  }, [processedData, searchTerm, startDate, endDate, suppliers]);
+  }, [data, searchTerm, startDate, endDate, suppliers]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
