@@ -53,6 +53,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { ComboboxPelanggan } from "@/components/ui/combobox-pelanggan";
 import { ComboboxSupplierProduk } from "@/components/ui/combobox-supplier-produk";
 import {
   addpelanggan,
@@ -496,53 +497,23 @@ function TambahPenjualanForm() {
                     Pelanggan
                     <span className="text-red-500">*</span>
                   </Label>
-                  <Select
-                    onValueChange={async (value) => {
-                      if (value === "add_new") {
-                        setShowNewPelangganForm(true);
-                        setPelangganId("");
-                        const newKode = await getNewKodePelanggan();
-                        setNewPelanggan((prev) => ({
-                          ...prev,
-                          kodePelanggan: newKode,
-                        }));
-                      } else {
-                        setShowNewPelangganForm(false);
-                        setPelangganId(value);
-                      }
-                    }}
+                  <ComboboxPelanggan
+                    pelangganList={pelangganList}
                     value={pelangganId}
-                  >
-                    <SelectTrigger className="h-12 border-2 group-hover:border-primary-foreground/50 transition-colors">
-                      <SelectValue placeholder="Pilih Pelanggan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="add_new">
-                        <div className="flex items-center gap-2">
-                          <Plus className="h-4 w-4" />
-                          <span>Tambah Pelanggan Baru</span>
-                        </div>
-                      </SelectItem>
-                      {pelangganList.map((p) => (
-                        <SelectItem
-                          key={p.id || p.namaPelanggan}
-                          value={p.id || ""}
-                        >
-                          <div className="flex items-center gap-2">
-                            <UserCircle className="h-4 w-4 text-primary-foreground" />
-                            <div>
-                              <div className="font-semibold">
-                                {p.namaPelanggan} ({p.kodePelanggan})
-                              </div>
-                              <div className="text-xs text-slate-500">
-                                {p.namaToko}
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(value) => {
+                      setShowNewPelangganForm(false);
+                      setPelangganId(value);
+                    }}
+                    onAddNew={async () => {
+                      setShowNewPelangganForm(true);
+                      setPelangganId("");
+                      const newKode = await getNewKodePelanggan();
+                      setNewPelanggan((prev) => ({
+                        ...prev,
+                        kodePelanggan: newKode,
+                      }));
+                    }}
+                  />
                 </div>
                 {showNewPelangganForm && (
                   <Card className="p-4 mt-4 bg-slate-50">
@@ -777,52 +748,23 @@ function TambahPenjualanForm() {
                       Pelanggan
                       <span className="text-red-500">*</span>
                     </Label>
-                    <Select
-                                          onValueChange={async (value) => {
-                                            if (value === "add_new") {
-                                              setShowNewPelangganForm(true);
-                                              setPelangganId("");
-                                              const newKode = await getNewKodePelanggan();
-                                              setNewPelanggan((prev) => ({
-                                                ...prev,
-                                                kodePelanggan: newKode,
-                                              }));
-                                            } else {
-                                              setShowNewPelangganForm(false);
-                                              setPelangganId(value);
-                                            }
-                                          }}                      value={pelangganId}
-                    >
-                      <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
-                        <SelectValue placeholder="Pilih Pelanggan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="add_new">
-                          <div className="flex items-center gap-2">
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Pelanggan Baru</span>
-                          </div>
-                        </SelectItem>
-                        {pelangganList.map((p) => (
-                          <SelectItem
-                            key={p.id || p.namaPelanggan}
-                            value={p.id || ""}
-                          >
-                            <div className="flex items-center gap-2">
-                              <UserCircle className="h-4 w-4 text-blue-500" />
-                              <div>
-                                <div className="font-semibold">
-                                  {p.namaPelanggan} ({p.kodePelanggan})
-                                </div>
-                                <div className="text-xs text-slate-500">
-                                  {p.namaToko}
-                                </div>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                                        <ComboboxPelanggan
+                                          pelangganList={pelangganList}
+                                          value={pelangganId}
+                                          onChange={(value) => {
+                                            setShowNewPelangganForm(false);
+                                            setPelangganId(value);
+                                          }}
+                                          onAddNew={async () => {
+                                            setShowNewPelangganForm(true);
+                                            setPelangganId("");
+                                            const newKode = await getNewKodePelanggan();
+                                            setNewPelanggan((prev) => ({
+                                              ...prev,
+                                              kodePelanggan: newKode,
+                                            }));
+                                          }}
+                                        />
                   </div>
                   {showNewPelangganForm && (
                     <Card className="p-4 mt-4 bg-slate-50">
