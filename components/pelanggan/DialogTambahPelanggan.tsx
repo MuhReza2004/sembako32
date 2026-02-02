@@ -40,7 +40,7 @@ export const DialogTambahPelanggan: React.FC<DialogTambahPelangganProps> = ({
       namaPelanggan: "",
       kodePelanggan: "",
       namaToko: "",
-      nib: "-",
+      nib: "",
       alamat: "",
       noTelp: "-",
       email: "",
@@ -151,10 +151,7 @@ export const DialogTambahPelanggan: React.FC<DialogTambahPelangganProps> = ({
               <Input
                 id="nib"
                 placeholder="Misal: 1234567890"
-                {...register("nib", {
-                  required: "NIB wajib diisi",
-                  minLength: { value: 10, message: "Minimal 10 karakter" },
-                })}
+                {...register("nib")}
                 className={errors.nib ? "border-red-500" : ""}
               />
               {errors.nib && (

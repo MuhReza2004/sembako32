@@ -54,7 +54,10 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ComboboxSupplierProduk } from "@/components/ui/combobox-supplier-produk";
-import { addpelanggan } from "@/app/services/pelanggan.service";
+import {
+  addpelanggan,
+  getNewKodePelanggan,
+} from "@/app/services/pelanggan.service";
 import {
   Dialog,
   DialogContent,
@@ -106,15 +109,17 @@ function TambahPenjualanForm() {
     null,
   );
   const [metodePembayaran, setMetodePembayaran] = useState("");
-  const [namaBank, setNamaBank] = useState("BNI");
-  const [namaPemilikRekening, setNamaPemilikRekening] = useState("RIZAL");
-  const [nomorRekening, setNomorRekening] = useState("19530117106");
+  const [namaBank, setNamaBank] = useState("BRI");
+  const [namaPemilikRekening, setNamaPemilikRekening] =
+    useState("RAHMAT SYUKUR");
+  const [nomorRekening, setNomorRekening] = useState("7071 0101 9195 533");
   const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState("");
   const [pajakEnabled, setPajakEnabled] = useState(false);
   const [diskon, setDiskon] = useState(0);
   const [showNewPelangganForm, setShowNewPelangganForm] = useState(false);
   const [newPelanggan, setNewPelanggan] = useState({
     namaPelanggan: "",
+    kodePelanggan: "",
     namaToko: "",
     alamat: "",
     noTelp: "",
@@ -133,6 +138,7 @@ function TambahPenjualanForm() {
       setShowNewPelangganForm(false);
       setNewPelanggan({
         namaPelanggan: "",
+        kodePelanggan: "",
         namaToko: "",
         alamat: "",
         noTelp: "-",
@@ -151,9 +157,9 @@ function TambahPenjualanForm() {
     setStatus("Lunas");
     setMetodePembayaran("");
     setMetodePengambilan("Ambil Langsung");
-    setNamaBank("BNI");
-    setNamaPemilikRekening("RIZAL");
-    setNomorRekening("19530117106");
+    setNamaBank("BRI");
+    setNamaPemilikRekening("RAHMAT SYUKUR");
+    setNomorRekening("7071 0101 9195 533");
     setTanggalJatuhTempo("");
     setPajakEnabled(false);
     setDiskon(0);
@@ -491,10 +497,15 @@ function TambahPenjualanForm() {
                     <span className="text-red-500">*</span>
                   </Label>
                   <Select
-                    onValueChange={(value) => {
+                    onValueChange={async (value) => {
                       if (value === "add_new") {
                         setShowNewPelangganForm(true);
                         setPelangganId("");
+                        const newKode = await getNewKodePelanggan();
+                        setNewPelanggan((prev) => ({
+                          ...prev,
+                          kodePelanggan: newKode,
+                        }));
                       } else {
                         setShowNewPelangganForm(false);
                         setPelangganId(value);
@@ -521,7 +532,7 @@ function TambahPenjualanForm() {
                             <UserCircle className="h-4 w-4 text-primary-foreground" />
                             <div>
                               <div className="font-semibold">
-                                {p.namaPelanggan}
+                                {p.namaPelanggan} ({p.kodePelanggan})
                               </div>
                               <div className="text-xs text-slate-500">
                                 {p.namaToko}
@@ -539,6 +550,8 @@ function TambahPenjualanForm() {
                       Tambah Pelanggan Baru
                     </h4>
                     <div className="space-y-2">
+                      <Label>Kode Pelanggan</Label>
+                      <Input value={newPelanggan.kodePelanggan} readOnly />
                       <Label>Nama Pelanggan</Label>
                       <Input
                         value={newPelanggan.namaPelanggan}
@@ -765,16 +778,20 @@ function TambahPenjualanForm() {
                       <span className="text-red-500">*</span>
                     </Label>
                     <Select
-                      onValueChange={(value) => {
-                        if (value === "add_new") {
-                          setShowNewPelangganForm(true);
-                          setPelangganId("");
-                        } else {
-                          setShowNewPelangganForm(false);
-                          setPelangganId(value);
-                        }
-                      }}
-                      value={pelangganId}
+                                          onValueChange={async (value) => {
+                                            if (value === "add_new") {
+                                              setShowNewPelangganForm(true);
+                                              setPelangganId("");
+                                              const newKode = await getNewKodePelanggan();
+                                              setNewPelanggan((prev) => ({
+                                                ...prev,
+                                                kodePelanggan: newKode,
+                                              }));
+                                            } else {
+                                              setShowNewPelangganForm(false);
+                                              setPelangganId(value);
+                                            }
+                                          }}                      value={pelangganId}
                     >
                       <SelectTrigger className="h-12 border-2 group-hover:border-blue-300 transition-colors">
                         <SelectValue placeholder="Pilih Pelanggan" />
@@ -795,7 +812,7 @@ function TambahPenjualanForm() {
                               <UserCircle className="h-4 w-4 text-blue-500" />
                               <div>
                                 <div className="font-semibold">
-                                  {p.namaPelanggan}
+                                  {p.namaPelanggan} ({p.kodePelanggan})
                                 </div>
                                 <div className="text-xs text-slate-500">
                                   {p.namaToko}
@@ -813,6 +830,8 @@ function TambahPenjualanForm() {
                         Tambah Pelanggan Baru
                       </h4>
                       <div className="space-y-2">
+                        <Label>Kode Pelanggan</Label>
+                        <Input value={newPelanggan.kodePelanggan} readOnly />
                         <Label>Nama Pelanggan</Label>
                         <Input
                           value={newPelanggan.namaPelanggan}
@@ -1066,7 +1085,8 @@ function TambahPenjualanForm() {
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Nama</div>
                       <div className="font-semibold text-slate-800">
-                        {selectedPelanggan?.namaPelanggan || "Tidak ada nama"}
+                        {selectedPelanggan?.namaPelanggan || "Tidak ada nama"} (
+                        {selectedPelanggan?.kodePelanggan || "N/A"})
                       </div>
                     </div>
                     <Separator />
@@ -1160,7 +1180,9 @@ function TambahPenjualanForm() {
                     </div>
                     {pajakEnabled && (
                       <div className="flex justify-between text-sm pt-2 border-t border-primary-foreground/30">
-                        <span className="text-primary-foreground">Nilai Pajak</span>
+                        <span className="text-primary-foreground">
+                          Nilai Pajak
+                        </span>
                         <span className="font-semibold text-primary-foreground/90">
                           + {formatRupiah(totalPajak)}
                         </span>
@@ -1259,7 +1281,8 @@ function TambahPenjualanForm() {
               <CardContent>
                 <p>
                   <span className="font-semibold">Nama:</span>{" "}
-                  {selectedPelanggan?.namaPelanggan}
+                  {selectedPelanggan?.namaPelanggan} (
+                  {selectedPelanggan?.kodePelanggan || "N/A"})
                 </p>
                 <p>
                   <span className="font-semibold">Toko:</span>{" "}

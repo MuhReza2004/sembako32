@@ -541,7 +541,7 @@ async function generatePdf(
             <div class="logo-container">
               <img src="${baseUrl}/logo.svg" alt="Logo" onerror="this.style.display='none'" />
             </div>
-            <h2>SEMBAKO 32</h2>
+            <h2>RPK SEMBAKO 32</h2>
           </div>
           <div class="company-details">
             <div class="company-item">
@@ -590,15 +590,15 @@ async function generatePdf(
         </div>
         <div class="invoice-item">
           <span class="label">Bank</span>
-          <span class="value">BNI</span>
+          <span class="value">BRI</span>
         </div>
         <div class="invoice-item">
           <span class="label">A/n</span>
-          <span class="value">RIZAL</span>
+          <span class="value">RAHMAT SYUKUR</span>
         </div>
         <div class="invoice-item">
           <span class="label">No Rek</span>
-          <span class="value">1953017106</span>
+          <span class="value">7071 0101 9195 533</span>
         </div>
         ${
           penjualan.status === "Belum Lunas" && penjualan.tanggalJatuhTempo
@@ -779,7 +779,7 @@ async function generatePdf(
       <div class="signature-section">
         <div class="signature-box">
           <p>Hormat Kami,</p>
-          <div class="signature-line">PT. Sumber Alam Pasangkayu</div>
+          <div class="signature-line">RPK Sembako 32</div>
         </div>
         <div class="signature-box">
           <p>Diterima Oleh,</p>

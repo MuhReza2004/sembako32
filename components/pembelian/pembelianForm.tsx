@@ -399,7 +399,7 @@ export default function PembelianForm({ onSuccess }: PembelianFormProps) {
                         Quantity
                       </Label>
                       <Input
-                        type="number"
+                        type="text"
                         min={1}
                         value={item.qty}
                         onChange={(e) =>

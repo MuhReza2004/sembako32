@@ -76,6 +76,9 @@ export const TabelPelanggan: React.FC<TabelPelangganProps> = ({
             <TableHead className="font-semibold text-gray-700">
               Nama Pelanggan
             </TableHead>
+            <TableHead className="font-semibold text-gray-700">
+              Kode Pelanggan
+            </TableHead>
             <TableHead className="font-semibold text-gray-700">NIB</TableHead>
             <TableHead className="font-semibold text-gray-700">
               No. Telp
@@ -111,6 +114,9 @@ export const TabelPelanggan: React.FC<TabelPelangganProps> = ({
                 </TableCell>
                 <TableCell className="text-gray-700 font-medium">
                   {customer.namaPelanggan}
+                </TableCell>
+                <TableCell className="text-gray-700 text-sm">
+                  {customer.kodePelanggan}
                 </TableCell>
 
                 <TableCell className="text-gray-700 text-sm">
